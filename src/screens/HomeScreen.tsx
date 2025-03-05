@@ -47,20 +47,40 @@ const HomeScreen = () => {
           </Card>
 
           {/* Expenses Breakdown (Pie Chart)  */}
-         
+
           <Card style={styles.chartCard}>
-            <Card.Title title="Expenses Breakdown" />
+            <Card.Title title="Monthly Spending" />
             <Card.Content>
-            <View style={{ height: 300 }}>
-      <PolarChart
-        data={DATA} // 👈 specify your data
-        labelKey={"label"} // 👈 specify data key for labels
-        valueKey={"value"} // 👈 specify data key for values
-        colorKey={"color"} // 👈 specify data key for color
-      >
-        <Pie.Chart />
-      </PolarChart>
-    </View>
+              <View style={{ height: 300 }}>
+                <CartesianChart
+                  data={[
+                    { month: 'Jan', amount: 450 },
+                    { month: 'Feb', amount: 380 },
+                    { month: 'Mar', amount: 520 },
+                    { month: 'Apr', amount: 290 },
+                    { month: 'May', amount: 410 },
+                  ]}
+                  xKey="month"
+                  yKeys={["amount"]}
+                  axisOptions={{
+                    labelPosition: { x: 'outset', y: 'outset' },
+                    lineColor: appColors.text.light,
+                    tickCount: { x: 5, y: 5 },
+                  }}
+                >
+                  {({ points, chartBounds }) => (
+                    <Bar 
+                      points={points.amount} 
+                      roundedCorners={{ topLeft: 5, topRight: 5 }}
+                      chartBounds={chartBounds} 
+                      color={appColors.tint} 
+                      barWidth={30} 
+                      barCount={5}
+                      labels={{position: "bottom", font: null}}
+                    />
+                  )}
+                </CartesianChart>
+              </View>
             </Card.Content>
           </Card>
 
