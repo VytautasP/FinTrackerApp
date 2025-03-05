@@ -10,8 +10,20 @@
     "test": "jest"
   },
   "dependencies": {
+    "@react-native-community/slider": "^4.5.6",
+    "@react-native-vector-icons/ionicons": "^7.4.0",
+    "@shopify/react-native-skia": "^1.11.10",
+    "date-fns": "^4.1.0",
     "react": "18.3.1",
-    "react-native": "0.76.0"
+    "react-dom": "^18.3.1",
+    "react-native": "0.76.0",
+    "react-native-dark": "^0.1.4",
+    "react-native-gesture-handler": "^2.24.0",
+    "react-native-paper": "^5.13.1",
+    "react-native-reanimated": "^3.17.1",
+    "react-native-safe-area-context": "^5.3.0",
+    "react-native-vector-icons": "^10.2.0",
+    "victory-native": "^41.16.1"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
