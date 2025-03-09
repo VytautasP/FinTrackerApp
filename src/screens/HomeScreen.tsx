@@ -2,9 +2,11 @@
 import { DashPathEffect } from '@shopify/react-native-skia';
 import React from 'react';
 import { View, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
-import { Appbar, Card, Text } from 'react-native-paper';
+import { Appbar, Button, Card, Text } from 'react-native-paper';
 import { Bar, CartesianChart, Pie, PolarChart, StackedArea } from "victory-native";
 import { appColors } from '../consts/colors';
+import { ca } from 'date-fns/locale';
+import LinearGradient from 'react-native-linear-gradient';
 
 // helper functions for example purposes:
 function randomNumber() {
@@ -38,12 +40,31 @@ const HomeScreen = () => {
 
           {/* Balance Card */}
           <Card style={styles.balanceCard}>
-            <Card.Title title="Total Balance" />
-            <Card.Content>
-              <Text variant="headlineLarge" style={styles.balanceText}>
-                $5,000
-              </Text>
+            <Card.Content style={styles.balanceCardContent}>
+              <LinearGradient
+                colors={['#3c8ae1', '#1c59cd']}
+                style={styles.gradientBackground}
+              >
+                <Text variant="headlineLarge" style={styles.balanceText}>
+                  $5,000
+                </Text>
+                <Text variant="bodySmall" style={styles.cardSubtitle}>
+                  total month balances
+                </Text>
+              </LinearGradient>
+
             </Card.Content>
+            <Card.Actions style={styles.balanceCardActions}>
+              <View style={styles.buttonContainer}>
+                <Button mode="contained-tonal" style={styles.smallButton} contentStyle={styles.smallButtonContent} labelStyle={styles.smallButtonLabel} 
+                rippleColor="rgba(0, 0, 0, .2)" // Add explicit ripple effect
+                >Add income</Button>
+                <View style={styles.verticalDivider} />
+                <Button mode="contained-tonal" style={styles.smallButton} contentStyle={styles.smallButtonContent} labelStyle={styles.smallButtonLabel}
+                rippleColor="rgba(0, 0, 0, .2)" // Add explicit ripple effect
+                >Add expense</Button>
+              </View>
+            </Card.Actions>
           </Card>
 
           {/* Expenses Breakdown (Pie Chart)  */}
@@ -69,14 +90,14 @@ const HomeScreen = () => {
                   }}
                 >
                   {({ points, chartBounds }) => (
-                    <Bar 
-                      points={points.amount} 
+                    <Bar
+                      points={points.amount}
                       roundedCorners={{ topLeft: 5, topRight: 5 }}
-                      chartBounds={chartBounds} 
-                      color={appColors.tint} 
-                      barWidth={30} 
+                      chartBounds={chartBounds}
+                      color={appColors.tint}
+                      barWidth={30}
                       barCount={5}
-                      labels={{position: "bottom", font: null}}
+                      labels={{ position: "bottom", font: null }}
                     />
                   )}
                 </CartesianChart>
@@ -114,6 +135,30 @@ const HomeScreen = () => {
 export default HomeScreen;
 
 const styles = StyleSheet.create({
+
+  smallButton: {
+    borderRadius: 8,
+    margin: 4,
+    minWidth: 120
+  },
+  smallButtonContent: {
+    height: 27,
+    paddingHorizontal: 30,
+  },
+  smallButtonLabel: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    marginVertical: 0,
+    marginHorizontal: 0,
+  },
+ 
+  verticalDivider: {
+    height: 24,
+    width: 1, 
+    backgroundColor: '#CCCCCC', 
+    marginHorizontal: 12,
+  },
+
   safeView: {
     flex: 1,
     backgroundColor: appColors.viewBackground.light,
@@ -126,9 +171,48 @@ const styles = StyleSheet.create({
   },
   balanceCard: {
     marginBottom: 16,
+    borderRadius: 20,
+    height: 140,
+    backgroundColor: appColors.white,
+  },
+  balanceCardContent: {
+    borderRadius: 20,
+    padding: 0,
+    margin: 0,
+    height: '73%'
+  },
+  balanceCardActions: {
+    borderRadius: 20,
+    height: '27%',
+    padding: 0
+  },
+  buttonContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    position: 'relative', // Not absolute
+  },
+  gradientBackground: {
+    position: 'absolute', // Position absolute to fill entire space
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 20,
+    justifyContent: 'center',
+  },
+  cardSubtitle: {
+    textAlign: 'center',
+    color: appColors.subtext,
+    fontWeight: 'bold',
   },
   balanceText: {
     marginTop: 8,
+    textAlign: 'center',
+    color: appColors.white,
+    fontWeight: 'bold',
   },
   chartCard: {
     marginBottom: 16,
