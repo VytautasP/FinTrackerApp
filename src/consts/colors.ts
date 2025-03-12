@@ -13,5 +13,8 @@ export const appColors = {
     buttonUnderlayColor: { dark: "#8b5cf6", light: "#ddd6fe" },
     main : { dark: "#8b5cf6", light: "#8b5cf6" },
     white : '#ffffff',
-    subtext: '#8cafed'
+    subTitleText: '#8cafed',
+    mainWidgetButtonsText: '#6496e8',
+    addIcon: '#47d147',
+    removeIcon: '#ff471a',
   } as const;

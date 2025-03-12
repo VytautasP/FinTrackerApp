@@ -7,6 +7,7 @@ import { Bar, CartesianChart, Pie, PolarChart, StackedArea } from "victory-nativ
 import { appColors } from '../consts/colors';
 import { ca } from 'date-fns/locale';
 import LinearGradient from 'react-native-linear-gradient';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 // helper functions for example purposes:
 function randomNumber() {
@@ -24,6 +25,8 @@ const DATA = (numberPoints = 5) =>
     color: generateRandomColor(),
     label: `Label ${index + 1}`,
   }));
+
+const button_icon_size = 13;
 
 const HomeScreen = () => {
 
@@ -56,17 +59,23 @@ const HomeScreen = () => {
             </Card.Content>
             <Card.Actions style={styles.balanceCardActions}>
               <View style={styles.buttonContainer}>
-                <Button mode="contained-tonal" style={styles.smallButton} contentStyle={styles.smallButtonContent} labelStyle={styles.smallButtonLabel} 
-                rippleColor="rgba(0, 0, 0, .2)" // Add explicit ripple effect
-                >Add income</Button>
+                <Button mode="text" 
+                icon={({size, color}) => (
+                  <Icon name="plus-circle" size={button_icon_size} color={appColors.addIcon}/>
+                )}
+                style={styles.smallButton} contentStyle={styles.smallButtonContent} labelStyle={styles.smallButtonLabel} onPress={() => {}}
+                //rippleColor="rgba(26, 182, 187, 0.2)" // Add explicit ripple effect
+                >Add incomes</Button>
                 <View style={styles.verticalDivider} />
-                <Button mode="contained-tonal" style={styles.smallButton} contentStyle={styles.smallButtonContent} labelStyle={styles.smallButtonLabel}
-                rippleColor="rgba(0, 0, 0, .2)" // Add explicit ripple effect
+                <Button 
+                icon={({size, color}) => (
+                  <Icon name="minus-circle" size={button_icon_size} color={appColors.removeIcon}/>
+                )}
+                mode="text" style={styles.smallButton} contentStyle={styles.smallButtonContent} labelStyle={styles.smallButtonLabel} onPress={() => {}}
                 >Add expense</Button>
               </View>
             </Card.Actions>
           </Card>
-
           {/* Expenses Breakdown (Pie Chart)  */}
 
           <Card style={styles.chartCard}>
@@ -141,15 +150,15 @@ const styles = StyleSheet.create({
     margin: 4,
     minWidth: 120
   },
+
   smallButtonContent: {
-    height: 27,
-    paddingHorizontal: 30,
+    height: 27
   },
+
   smallButtonLabel: {
     fontSize: 11,
-    fontWeight: 'bold',
     marginVertical: 0,
-    marginHorizontal: 0,
+    color: appColors.mainWidgetButtonsText
   },
  
   verticalDivider: {
@@ -192,7 +201,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
-    position: 'relative', // Not absolute
+    position: 'relative',
   },
   gradientBackground: {
     position: 'absolute', // Position absolute to fill entire space
@@ -205,11 +214,10 @@ const styles = StyleSheet.create({
   },
   cardSubtitle: {
     textAlign: 'center',
-    color: appColors.subtext,
+    color: appColors.subTitleText,
     fontWeight: 'bold',
   },
   balanceText: {
-    marginTop: 8,
     textAlign: 'center',
     color: appColors.white,
     fontWeight: 'bold',
