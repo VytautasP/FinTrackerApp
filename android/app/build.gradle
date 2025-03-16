@@ -118,4 +118,26 @@ dependencies {
     }
 }
 
+project.ext.vectoricons = [
+   iconFontNames: [
+      'AntDesign.ttf',
+      'Entypo.ttf',
+      'EvilIcons.ttf',
+      'Feather.ttf',
+      'FontAwesome.ttf',
+      'FontAwesome5_Brands.ttf',
+      'FontAwesome5_Regular.ttf',
+      'FontAwesome5_Solid.ttf',
+      'Fontisto.ttf',
+      'Foundation.ttf',
+      'Ionicons.ttf',
+      'MaterialCommunityIcons.ttf',
+      'MaterialIcons.ttf',
+      'Octicons.ttf',
+      'SimpleLineIcons.ttf',
+      'Zocial.ttf',
+      'Roboto_Condensed-Thin.ttf' // Your custom font
+   ]
+]
+
 apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
