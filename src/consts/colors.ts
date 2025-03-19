@@ -1,3 +1,5 @@
+import { secondsInDay } from "date-fns/constants";
+
 export const appColors = {
     tint: "#f04d21",
     androidHeader: { dark: "#262626", light: "#fafafa" },
@@ -14,7 +16,11 @@ export const appColors = {
     main : { dark: "#8b5cf6", light: "#8b5cf6" },
     white : '#ffffff',
     subTitleText: '#8cafed',
+    secondaryText : '#9e9e9e',
     mainWidgetButtonsText: '#6496e8',
     addIcon: '#47d147',
     removeIcon: '#ff471a',
+    incomeBar: '#80ccff',
+    expenseBar: '#a78bfa',
+
   } as const;
