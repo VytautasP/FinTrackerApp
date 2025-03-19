@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, FlatList, Dimensions } from 'react-native';
 import { Surface, Text, TouchableRipple } from 'react-native-paper';
+import { appColors } from '../../consts/colors';
 
 
 interface MonthSelectorProps {
@@ -128,8 +129,6 @@ const onScrollToIndexFailed = (info: ScrollToIndexFailInfo) => {
 
 const styles = StyleSheet.create({
   container: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
     paddingVertical: 8,
   },
   scrollViewContent: {
@@ -156,7 +155,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   inactiveLabel: {
-    color: '#9e9e9e',
+    color: appColors.secondaryText,
   },
 });
 
