@@ -6,7 +6,8 @@ import { appColors } from '../consts/colors';
 import MonthSelector from '../components/MonthSelector/MonthSelector';
 import BalanceCard from '../components/BalanceCard/BalanceCard';
 import ExpensesChart from '../components/ExpensesChart/ExpensesChart';
-import RecentTransactions from '../components/RecentTransactions/RecentTransactions';
+import TransactionsList from '../components/Transactions/TransactionsList';
+
 
 const HomeScreen: React.FC = () => {
 
@@ -36,7 +37,7 @@ const HomeScreen: React.FC = () => {
           <ExpensesChart />
 
           {/* Recent Transactions */}
-          <RecentTransactions />
+          <TransactionsList />
         </ScrollView>
       </View>
     </SafeAreaView>
