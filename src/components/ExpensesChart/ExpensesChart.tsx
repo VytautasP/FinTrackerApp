@@ -33,20 +33,25 @@ const ExpensesChart: React.FC = () => {
 
   return (
     <Card style={styles.chartCard}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Money flow</Text>
+      </View>
       {/* Legend */}
       <View style={styles.legendContainer}>
-          <View style={styles.legendItem}>
-            <View style={[styles.legendColor, { backgroundColor: appColors.incomeBar }]} />
-            <Text style={styles.legendText}>Income</Text>
-          </View>
-          <View style={styles.legendItem}>
-            <View style={[styles.legendColor, { backgroundColor: appColors.expenseBar }]} />
-            <Text style={styles.legendText}>Expenses</Text>
-          </View>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendColor, { backgroundColor: appColors.incomeBar }]} />
+          <Text style={styles.legendText}>Income</Text>
         </View>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendColor, { backgroundColor: appColors.expenseBar }]} />
+          <Text style={styles.legendText}>Expenses</Text>
+        </View>
+      </View>
       <Card.Content>
         <View style={{ height: 200 }}>
           <CartesianChart
+            padding={{ bottom: -8 }}
             domain={{ x: [0, 31] }}
             viewport={{ x: [0, 7] }}
             data={DATA}
@@ -88,6 +93,17 @@ const ExpensesChart: React.FC = () => {
                     topRight: 5
                   }}
                 >
+
+                  <BarGroup.Bar points={points.expense} animate={{ type: "spring" }} color={appColors.expenseBar}>
+                    {/* <LinearGradient
+                      start={vec(0, 0)} // 👈 The start and end are vectors that represent the direction of the gradient.
+                      end={vec(0, 250)}
+                      colors={[ // 👈 The colors are an array of strings that represent the colors of the gradient.
+                        "#80ccff",
+                        "#80ccff50" // 👈 The second color is the same as the first but with an alpha value of 50%.
+                      ]}
+                    /> */}
+                  </BarGroup.Bar>
                   <BarGroup.Bar points={points.income} animate={{ type: "spring" }} color={appColors.incomeBar}>
                     {/* <LinearGradient
                       start={vec(0, 0)} // 👈 The start and end are vectors that represent the direction of the gradient.
@@ -95,16 +111,6 @@ const ExpensesChart: React.FC = () => {
                       colors={[ // 👈 The colors are an array of strings that represent the colors of the gradient.
                         "#a78bfa",
                         "#a78bfa50" // 👈 The second color is the same as the first but with an alpha value of 50%.
-                      ]}
-                    /> */}
-                  </BarGroup.Bar>
-                   <BarGroup.Bar points={points.expense} animate={{ type: "spring" }} color={appColors.expenseBar}>
-                    {/* <LinearGradient
-                      start={vec(0, 0)} // 👈 The start and end are vectors that represent the direction of the gradient.
-                      end={vec(0, 250)}
-                      colors={[ // 👈 The colors are an array of strings that represent the colors of the gradient.
-                        "#80ccff",
-                        "#80ccff50" // 👈 The second color is the same as the first but with an alpha value of 50%.
                       ]}
                     /> */}
                   </BarGroup.Bar>
@@ -123,6 +129,14 @@ const styles = StyleSheet.create({
   chartCard: {
     marginBottom: 20,
     backgroundColor: appColors.white,
+  },
+  header: {
+    paddingHorizontal: 16,
+    paddingTop: 10,
+  },
+  headerText: {
+    fontSize: 13,
+    fontWeight: 'bold',
   },
   legendContainer: {
     flexDirection: 'row',
