@@ -15,7 +15,7 @@ export default function Main() {
     <SafeAreaProvider>
       <PaperProvider>
       <GestureHandlerRootView>
-         {/* <App /> */}
+         {/* App */}
         <HomeScreen />
       </GestureHandlerRootView>  
       </PaperProvider>
