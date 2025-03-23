@@ -28,7 +28,7 @@ const TransactionItem: React.FC<{ item: TransactionItemProps }> = ({ item }) => 
           <Text style={styles.transactionInfo}>{item.date} • {item.time}</Text>
         </View>
       </View>
-      <Text style={[styles.amount, { color: item.amount < 0 ? 'black' : 'green' }]}>
+      <Text style={[styles.amount, { color: item.amount < 0 ? 'red' : 'green' }]}>
          {item.amount < 0 ? '-€' : '+€'}{Math.abs(item.amount).toLocaleString()}
       </Text>
     </View>

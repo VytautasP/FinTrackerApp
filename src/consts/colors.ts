@@ -20,7 +20,8 @@ export const appColors = {
     mainWidgetButtonsText: '#6496e8',
     addIcon: '#47d147',
     removeIcon: '#ff471a',
-    incomeBar: '#80ccff',
-    expenseBar: '#a78bfa',
+    incomeBar: 'rgba(122, 209, 72, 0.66)',
+    expenseBar: 'rgba(255, 1, 1, 0.55)',
+    widgetHeaderText : 'rgba(0, 0, 0, 0.71)'
 
   } as const;

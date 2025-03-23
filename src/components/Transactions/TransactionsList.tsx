@@ -33,7 +33,7 @@ const transactionsData: TransactionItemProps[] = [
     logoBackground: '#FF9900',
   },
   {
-    id: '3',
+    id: '7',
     merchantName: 'Salary',
     date: 'Mar 01',
     time: '10:00 AM',
@@ -90,7 +90,6 @@ const TransactionsList: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     borderRadius: 12,
-    //marginHorizontal: 16,
     marginVertical: 8,
     elevation: 2,
     backgroundColor: appColors.white,
@@ -102,6 +101,7 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 13,
     fontWeight: 'bold',
+    color: appColors.widgetHeaderText,
   },
 });
 
