@@ -7,11 +7,24 @@ import MonthSelector from '../components/MonthSelector/MonthSelector';
 import BalanceCard from '../components/BalanceCard/BalanceCard';
 import ExpensesChart from '../components/ExpensesChart/ExpensesChart';
 import TransactionsList from '../components/Transactions/TransactionsList';
+import TransactionInputModal, { TransactionItem } from '../components/Transactions/TransactionInputModal';
 
 
 const HomeScreen: React.FC = () => {
 
   const [selectedMonth, setSelectedMonth] = useState(new Date());
+  const [modalVisible, setModalVisible] = useState(false);
+  
+  const showModal = () => {
+    console.log('Show modal');
+    setModalVisible(true);
+  };
+  const hideModal = () => setModalVisible(false);
+  
+  const handleSaveTransaction = (transaction: TransactionItem) => {
+    console.log('Saved transaction:', transaction);
+    // Here you would typically save the transaction to your state or database
+  };
 
   return (
     <SafeAreaView style={styles.safeView}>
@@ -25,7 +38,10 @@ const HomeScreen: React.FC = () => {
         <ScrollView contentContainerStyle={styles.content}>
 
           {/* Balance Card */}
-          <BalanceCard />
+          <BalanceCard
+            addIncome={showModal}
+            addExpense={() => {}}
+          />
 
           {/* Month selector */}
           <MonthSelector
@@ -40,6 +56,13 @@ const HomeScreen: React.FC = () => {
           <TransactionsList />
         </ScrollView>
       </View>
+
+      <TransactionInputModal
+        visible={modalVisible}
+        onDismiss={hideModal}
+        onSave={handleSaveTransaction}
+      />
+
     </SafeAreaView>
   );
 };
