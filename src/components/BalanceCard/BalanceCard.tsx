@@ -7,7 +7,15 @@ import { appColors } from '../../consts/colors';
 
 const button_icon_size = 13;
 
-const BalanceCard : React.FC = () => {
+interface BalanceCardProps {
+  addIncome: () => void;
+  addExpense: () => void;
+}
+
+const BalanceCard : React.FC<BalanceCardProps> = (props: BalanceCardProps) => {
+
+  const { addIncome, addExpense} = props;
+
   return (
     <Card style={styles.balanceCard}>
       <Card.Content style={styles.balanceCardContent}>
@@ -29,14 +37,14 @@ const BalanceCard : React.FC = () => {
             icon={({ size, color }) => (
               <Icon name="plus-circle" size={button_icon_size} color={appColors.addIcon} />
             )}
-            style={styles.smallButton} contentStyle={styles.smallButtonContent} labelStyle={styles.smallButtonLabel} onPress={() => { }}
+            style={styles.smallButton} contentStyle={styles.smallButtonContent} labelStyle={styles.smallButtonLabel} onPress={addIncome}
           >Add incomes</Button>
           <View style={styles.verticalDivider} />
           <Button
             icon={({ size, color }) => (
               <Icon name="minus-circle" size={button_icon_size} color={appColors.removeIcon} />
             )}
-            mode="text" style={styles.smallButton} contentStyle={styles.smallButtonContent} labelStyle={styles.smallButtonLabel} onPress={() => { }}
+            mode="text" style={styles.smallButton} contentStyle={styles.smallButtonContent} labelStyle={styles.smallButtonLabel} onPress={addExpense}
           >Add expense</Button>
         </View>
       </Card.Actions>
