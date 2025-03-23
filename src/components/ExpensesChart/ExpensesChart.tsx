@@ -137,6 +137,7 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 13,
     fontWeight: 'bold',
+    color: appColors.widgetHeaderText,
   },
   legendContainer: {
     flexDirection: 'row',
@@ -154,7 +155,7 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 3,
-    marginRight: 6,
+    marginRight: 6
   },
   legendText: {
     fontSize: 12,
