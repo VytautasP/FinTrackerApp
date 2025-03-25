@@ -1,9 +1,9 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { Modal, Portal, Text, Button, TextInput, Surface, Avatar, useTheme, IconButton } from 'react-native-paper';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Alert, Dimensions } from 'react-native';
+import { Text, Button, TextInput, Avatar, IconButton } from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { v4 as uuidv4 } from 'uuid';
-import BottomSheet, { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
+import { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetModal, BottomSheetModalProvider, BottomSheetView } from '@gorhom/bottom-sheet';
 
 const categories = [
     { id: '1', name: 'Shopping', icon: 'basket', color: '#FFCDD2' },
@@ -84,13 +84,12 @@ const TransactionInputModal: React.FC<TransactionInputModalProps> = ({ visible, 
     };
 
     const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-    const bottomSheetRef = useRef<BottomSheet>(null);
-     // callbacks
+    // callbacks
     const handleSheetChanges = useCallback((index: number) => {
-    console.log('handleSheetChanges', index);
-     }, []);
+        console.log('handleSheetChanges', index);
+    }, []);
 
-    
+
     useEffect(() => {
 
         if (visible) {
@@ -98,80 +97,99 @@ const TransactionInputModal: React.FC<TransactionInputModalProps> = ({ visible, 
         } else {
             bottomSheetModalRef.current?.dismiss();
         }
-    }, [visible]); 
+    }, [visible]);
+
+
+    const InstantBackdrop = useCallback(
+        (props: BottomSheetBackdropProps) => (
+            <BottomSheetBackdrop
+                {...props}
+                disappearsOnIndex={-1}
+                appearsOnIndex={0}
+                opacity={0.8} 
+                pressBehavior="close"
+                enableTouchThrough={false}
+                style={[
+                    props.style,
+                    {
+                        backgroundColor: 'rgba(78, 72, 72, 0.83)',
+                        opacity: 0.8
+                    }
+                ]}
+            />
+        ),
+        []
+    );       
 
     return (
 
 
-        <BottomSheetModal
-            ref={bottomSheetModalRef}
-            onChange={handleSheetChanges}
-            onDismiss={onDismiss}
-          >
-            <BottomSheetView >
-        {/* <Portal>
-             <Modal visible={visible} onDismiss={onDismiss} contentContainerStyle={styles.modalContainer}> */}
-              <Surface style={styles.surface}>
-                <View style={styles.dragIndicator} />
+        <BottomSheetModalProvider>
 
-                  {/* Category Selector */}
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryContainer}>
-                  {  
-                    categories.map((category) => (
-                      <TouchableOpacity 
-                        key={category.id}
-                        style={[styles.categoryItem,selectedCategory.id === category.id && styles.selectedCategory]} onPress={() => setSelectedCategory(category)}>
-                        <Avatar.Icon size={50} icon={category.icon} style={{ backgroundColor: category.color }} color="#000"/>
-                        <Text style={styles.categoryName}>
-                          {category.name}
-                        </Text>
-                      </TouchableOpacity>
-                    ))
-                  }
-                  </ScrollView>
+            <BottomSheetModal
+                ref={bottomSheetModalRef}
+                onChange={handleSheetChanges}
+                onDismiss={onDismiss}
+                backdropComponent={InstantBackdrop}
+            >
+                <BottomSheetView style={{height: Dimensions.get('window').height * 0.71}}>
+                    <View style={styles.surface}>
 
-                  <Text style={styles.categoryTitle}>{selectedCategory.name}</Text>
-                  
-                  {/* Transaction Details */}
-                  <View style={styles.inputContainer}>
-                    <TextInput
-                      mode="outlined"
-                      label="Title"
-                      value={title}
-                      onChangeText={setTitle}
-                      style={styles.input}
-                      placeholder="Sarojini dress shopping"
-                    />
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryContainer}>
+                            {
+                                categories.map((category) => (
+                                    <TouchableOpacity
+                                        key={category.id}
+                                        style={[styles.categoryItem, selectedCategory.id === category.id && styles.selectedCategory]} onPress={() => setSelectedCategory(category)}>
+                                        <Avatar.Icon size={50} icon={category.icon} style={{ backgroundColor: category.color }} color="#000" />
+                                        <Text style={styles.categoryName}>
+                                            {category.name}
+                                        </Text>
+                                    </TouchableOpacity>
+                                ))
+                            }
+                        </ScrollView>
 
-                    <TextInput
-                      mode="outlined"
-                      label="Amount"
-                      value={amount}
-                      onChangeText={setAmount}
-                      keyboardType="numeric"
-                      style={styles.input}
-                      left={<TextInput.Affix text="₹" />}
-                      placeholder="1,200"
-                    />
+                        <Text style={styles.categoryTitle}>{selectedCategory.name}</Text>
 
-                    <View style={styles.dateContainer}>
-                      <Text style={styles.dateLabel}>Date</Text>
-                      <TouchableOpacity style={styles.dateSelector} onPress={() => setShowDatePicker(true)}>
-                      <Text>{formatDate(date)}</Text>
-                      <IconButton icon="calendar" size={20} /*color={theme.colors.primary}*//>
-                      </TouchableOpacity>
+                        <View style={styles.inputContainer}>
+                            <TextInput
+                                mode="outlined"
+                                label="Title"
+                                value={title}
+                                onChangeText={setTitle}
+                                style={styles.input}
+                                placeholder="Sarojini dress shopping"
+                            />
+
+                            <TextInput
+                                mode="outlined"
+                                label="Amount"
+                                value={amount}
+                                onChangeText={setAmount}
+                                keyboardType="numeric"
+                                style={styles.input}
+                                left={<TextInput.Affix text="₹" />}
+                                placeholder="1,200"
+                            />
+
+                            <View style={styles.dateContainer}>
+                                <Text style={styles.dateLabel}>Date</Text>
+                                <TouchableOpacity style={styles.dateSelector} onPress={() => setShowDatePicker(true)}>
+                                    <Text>{formatDate(date)}</Text>
+                                    <IconButton icon="calendar" size={20} />
+                                </TouchableOpacity>
+                            </View>
+
+                            {showDatePicker && (<DateTimePicker value={date} mode="date" display="default" onChange={handleDateChange} />)}
+                        </View>
+
+
+                        <Button mode="contained" onPress={handleSave} style={styles.saveButton} labelStyle={styles.saveButtonLabel}>Add income</Button>
                     </View>
-
-                      {showDatePicker && (<DateTimePicker value={date} mode="date" display="default" onChange={handleDateChange}/>)}
-                  </View>
-
-                  {/* Save Button */}
-                  <Button mode="contained" onPress={handleSave} style={styles.saveButton} labelStyle={styles.saveButtonLabel}>Add income</Button>
-                </Surface>
-            {/* </Modal>
-        </Portal> */}
-        </BottomSheetView>
-        </BottomSheetModal>
+                </BottomSheetView>
+            </BottomSheetModal>
+        </BottomSheetModalProvider>
     );
 };
 
