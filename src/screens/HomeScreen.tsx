@@ -9,9 +9,10 @@ import ExpensesChart from '../components/ExpensesChart/ExpensesChart';
 import TransactionsList from '../components/Transactions/TransactionsList';
 import TransactionInputModal, { TransactionItem } from '../components/Transactions/TransactionInputModal';
 
+const container_padding = 16;
 
 const HomeScreen: React.FC = () => {
-
+ 
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [modalVisible, setModalVisible] = useState(false);
   
@@ -22,8 +23,8 @@ const HomeScreen: React.FC = () => {
   const hideModal = () => setModalVisible(false);
   
   const handleSaveTransaction = (transaction: TransactionItem) => {
+    //TODO: Save the transaction to the database or state management
     console.log('Saved transaction:', transaction);
-    // Here you would typically save the transaction to your state or database
   };
 
   return (
@@ -78,6 +79,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: 16,
+    padding: container_padding,
   },
 });
