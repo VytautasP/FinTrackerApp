@@ -1,13 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import React from 'react'
 import { Avatar } from 'react-native-paper';
-
-export interface CategoryItem {
-    id: string;
-    name: string;
-    icon: string;
-    color: string;
-}
+import { CategoryItem } from '../../consts/categories';
 
 interface CategoryItemProps {
     item: CategoryItem;
@@ -19,12 +13,16 @@ interface CategoryItemProps {
 const CategoryItemContainer : React.FC<CategoryItemProps> = (props: CategoryItemProps) => {
 
     const { item, itemHeight, isSelected, onPress } = props;
+    
+    //calculate transform scale based on the itemHeight
+    const scale = itemHeight / 55; // Assuming the original height is 100
+    const transformStyle = { transform: [{ scale }] };
 
     return (
 
         <View style={sytles.container}>
             <View style={[sytles.content, { height: itemHeight }]}>
-                <TouchableOpacity style={isSelected ? sytles.selectedCategory : {}} onPress={() => onPress && onPress(item)}>
+                <TouchableOpacity style={isSelected ? transformStyle : {}} onPress={() => onPress && onPress(item)}>
                   <Avatar.Icon size={50} icon={item.icon} style={[{ backgroundColor: item.color }]} color="#000" />
                 </TouchableOpacity>
             </View>
@@ -39,18 +37,11 @@ const sytles = StyleSheet.create({
         width: 150
     },
     content: {
-        backgroundColor: 'red',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
         width: "100%"
     },
-    text: {
-        color: 'white',
-    },
-    selectedCategory: {
-        transform: [{ scale: 1.6 }],
-      },
 })
 
 export default CategoryItemContainer;

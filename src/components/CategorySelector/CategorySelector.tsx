@@ -1,34 +1,26 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { View, SafeAreaView, StyleSheet, Dimensions } from 'react-native'
 import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel';
-import CategoryItemContainer, { CategoryItem } from './CategoryItemContainer';
+import CategoryItemContainer from './CategoryItemContainer';
+import { CategoryItem } from '../../consts/categories';
 
-
-
-const categories : CategoryItem[] = [
-    { id: '1', name: 'Shopping', icon: 'basket', color: '#FFCDD2' },
-    { id: '2', name: 'Entertainment', icon: 'movie', color: '#E1BEE7' },
-    { id: '3', name: 'Location', icon: 'map-marker', color: '#BBDEFB' },
-    { id: '4', name: 'Food', icon: 'food', color: '#FFE0B2' },
-    { id: '5', name: 'Transport', icon: 'car', color: '#C8E6C9' },
-    { id: '6', name: 'Transport', icon: 'car', color: '#C8E6C9' },
-    { id: '7', name: 'Transport', icon: 'car', color: '#C8E6C9' },
-    { id: '8', name: 'Transport', icon: 'car', color: '#C8E6C9' },
-];
 
 const window = Dimensions.get("window");
-const bandHeight = 100;
-const defaultSelectedIndex = 1;
+const defaultHeight = 100;
 
-interface CarouselTestCompProps {
+interface CategorySelectorProps {
     padding: number;
+    height?: number;
+    categories: CategoryItem[];
+    defaultSelectedIndex: number;
+    onCategorySelected?: (category: CategoryItem) => void;
 }
 
-const  CategorySelector : React.FC<CarouselTestCompProps> = (props: CarouselTestCompProps) =>
+const  CategorySelector : React.FC<CategorySelectorProps> = (props: CategorySelectorProps) =>
 {
-   const [selectedCategory, setSelectedCategory] = useState(categories[defaultSelectedIndex]);
+    const { padding, height, categories, defaultSelectedIndex, onCategorySelected } = props;
 
-    const { padding } = props;
+    const [selectedCategory, setSelectedCategory] = useState(categories && categories[defaultSelectedIndex]);
     const carouselRef = useRef<ICarouselInstance>(null);
 
     const baseOptions = {
@@ -37,14 +29,29 @@ const  CategorySelector : React.FC<CarouselTestCompProps> = (props: CarouselTest
         parallaxAdjacentItemScale: 1,
     }
 
-    const handleCategorySelection = (category: CategoryItem) => {
+    const handleCategoryItemPress = (category: CategoryItem) => {
         setSelectedCategory(category);
 
         const index = categories.findIndex((item) => item.id === category.id);
         if (carouselRef.current) {
             carouselRef.current.scrollTo({ index, animated: true });
         }
+
+        onCategorySelected && onCategorySelected(category);
     }
+
+    const handleSnapToItem = (index: number) => {
+        const category = categories[index];
+        setSelectedCategory(categories[index]);
+        onCategorySelected && onCategorySelected(category);
+    }
+
+    const bandHeight = height ?? defaultHeight;
+
+    useEffect(() => {
+      console.log('CategorySelector mounted')
+      console.log('Band Height: ', bandHeight)
+    })
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -57,18 +64,18 @@ const  CategorySelector : React.FC<CarouselTestCompProps> = (props: CarouselTest
                     autoPlay={false}
                     width={window.width - 2 * padding}
                     defaultIndex={defaultSelectedIndex}
-                    height={100}
+                    height={bandHeight}
                     data={categories} 
-                    style={{backgroundColor: 'green'}}
+                    //style={{backgroundColor: 'green'}}
                     mode="parallax"
                     modeConfig={baseOptions}
-                    onSnapToItem={(index) => {setSelectedCategory(categories[index]);}}
+                    onSnapToItem={handleSnapToItem}
                     renderItem={({ item, index, animationValue }) => 
                       <CategoryItemContainer 
                         item={item} 
                         itemHeight={bandHeight} 
                         isSelected={item.id === selectedCategory.id}
-                        onPress={handleCategorySelection}
+                        onPress={handleCategoryItemPress}
                         />
                     }
                     >
@@ -89,8 +96,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         width: '100%',
-        height: bandHeight,
-        borderWidth: 2
     },
 })
 
