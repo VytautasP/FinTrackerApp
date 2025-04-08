@@ -19,17 +19,10 @@ const DATA = Array.from({ length: 31 }, (_, i) => {
   return dtItem;
 });
 
-function MyCustomLine({ points }: { points: PointsArray }) {
-  const { path } = useLinePath(points, { curveType: "natural" });
-  return <Path path={path} style="stroke" strokeWidth={2} color="#3078e8" />;
-}
-
 const ExpensesChart: React.FC = () => {
 
   const transformState = useChartTransformState();
   const skFont = useFont(require("../../assets/fonts/Roboto-Regular.ttf"), 12);
-
-  console.log("skFont ", skFont);
 
   return (
     <Card style={styles.chartCard}>
