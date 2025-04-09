@@ -1,9 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useRef } from 'react'
 import { View, SafeAreaView, StyleSheet, Dimensions } from 'react-native'
 import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel';
 import CategoryItemContainer from './CategoryItemContainer';
 import { CategoryItem } from '../../consts/categories';
-
 
 const window = Dimensions.get("window");
 const defaultHeight = 100;
@@ -12,15 +11,12 @@ interface CategorySelectorProps {
     padding: number;
     height?: number;
     categories: CategoryItem[];
-    defaultSelectedIndex: number;
-    onCategorySelected?: (category: CategoryItem) => void;
+    selectedCategory: CategoryItem;
+    onCategorySelected: (category: CategoryItem) => void;
 }
 
-const  CategorySelector : React.FC<CategorySelectorProps> = (props: CategorySelectorProps) =>
-{
-    const { padding, height, categories, defaultSelectedIndex, onCategorySelected } = props;
-
-    const [selectedCategory, setSelectedCategory] = useState(categories && categories[defaultSelectedIndex]);
+const CategorySelector: React.FC<CategorySelectorProps> = (props) => {
+    const { padding, height, categories, selectedCategory, onCategorySelected } = props;
     const carouselRef = useRef<ICarouselInstance>(null);
 
     const baseOptions = {
@@ -30,57 +26,46 @@ const  CategorySelector : React.FC<CategorySelectorProps> = (props: CategorySele
     }
 
     const handleCategoryItemPress = (category: CategoryItem) => {
-        setSelectedCategory(category);
-
         const index = categories.findIndex((item) => item.id === category.id);
         if (carouselRef.current) {
             carouselRef.current.scrollTo({ index, animated: true });
         }
-
-        onCategorySelected && onCategorySelected(category);
+        onCategorySelected(category);
     }
 
     const handleSnapToItem = (index: number) => {
         const category = categories[index];
-        setSelectedCategory(categories[index]);
-        onCategorySelected && onCategorySelected(category);
+        if (category.id !== selectedCategory.id) {
+            onCategorySelected(category);
+        }
     }
 
     const bandHeight = height ?? defaultHeight;
-
-    useEffect(() => {
-      console.log('CategorySelector mounted')
-      console.log('Band Height: ', bandHeight)
-    })
+    const selectedIndex = categories.findIndex((item) => item.id === selectedCategory.id);
 
     return (
         <SafeAreaView style={styles.safeArea}>
-
             <View style={styles.container}>
-                
                 <Carousel
                     ref={carouselRef}
                     loop={false}
                     autoPlay={false}
                     width={window.width - 2 * padding}
-                    defaultIndex={defaultSelectedIndex}
+                    defaultIndex={selectedIndex}
                     height={bandHeight}
-                    data={categories} 
-                    //style={{backgroundColor: 'green'}}
+                    data={categories}
                     mode="parallax"
                     modeConfig={baseOptions}
                     onSnapToItem={handleSnapToItem}
-                    renderItem={({ item, index, animationValue }) => 
+                    renderItem={({ item }) => 
                       <CategoryItemContainer 
                         item={item} 
                         itemHeight={bandHeight} 
                         isSelected={item.id === selectedCategory.id}
                         onPress={handleCategoryItemPress}
-                        />
+                      />
                     }
-                    >
-                </Carousel>
-               
+                />
             </View>
         </SafeAreaView> 
     )
@@ -99,4 +84,4 @@ const styles = StyleSheet.create({
     },
 })
 
-export default CategorySelector;
+export default React.memo(CategorySelector);

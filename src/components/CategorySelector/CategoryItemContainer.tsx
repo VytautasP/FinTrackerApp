@@ -14,16 +14,27 @@ const CategoryItemContainer : React.FC<CategoryItemProps> = (props: CategoryItem
 
     const { item, itemHeight, isSelected, onPress } = props;
     
-    //calculate transform scale based on the itemHeight
-    const scale = itemHeight / 55; // Assuming the original height is 100
+    const scale = itemHeight / 60;
     const transformStyle = { transform: [{ scale }] };
 
     return (
-
         <View style={sytles.container}>
             <View style={[sytles.content, { height: itemHeight }]}>
-                <TouchableOpacity style={isSelected ? transformStyle : {}} onPress={() => onPress && onPress(item)}>
-                  <Avatar.Icon size={50} icon={item.icon} style={[{ backgroundColor: item.color }]} color="#000" />
+                <TouchableOpacity 
+                    style={[
+                        isSelected ? transformStyle : {}
+                    ]} 
+                    onPress={() => onPress && onPress(item)}
+                >
+                  <Avatar.Icon 
+                    size={50} 
+                    icon={item.icon} 
+                    style={[
+                        { backgroundColor: item.color },
+                        isSelected ? sytles.selectedAvatar : {}
+                    ]} 
+                    color="#000" 
+                  />
                 </TouchableOpacity>
             </View>
         </View>
@@ -34,7 +45,7 @@ const sytles = StyleSheet.create({
     container: {
         alignSelf: 'center',
         height: "100%",
-        width: 150
+        width: 180
     },
     content: {
         display: 'flex',
@@ -42,6 +53,18 @@ const sytles = StyleSheet.create({
         alignItems: 'center',
         width: "100%"
     },
+    selectedAvatar: {
+        elevation: 5,     // Add shadow on Android
+        shadowColor: '#000', // Shadow for iOS
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 3,
+    }
 })
 
-export default CategoryItemContainer;
+export default React.memo(CategoryItemContainer, (prevProps, nextProps) => {
+    // Only re-render if these props change
+    return prevProps.isSelected === nextProps.isSelected && 
+           prevProps.itemHeight === nextProps.itemHeight &&
+           prevProps.item.id === nextProps.item.id;
+});

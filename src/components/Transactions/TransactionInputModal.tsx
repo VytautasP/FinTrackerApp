@@ -134,7 +134,7 @@ const TransactionInputModal: React.FC<TransactionInputModalProps> = ({ visible, 
     }
   }, [visible, resetForm]);
   
-  const categoriesItemHeight = 110;
+  const categoriesItemHeight = 130;
 
   return (
 
@@ -153,9 +153,9 @@ const TransactionInputModal: React.FC<TransactionInputModalProps> = ({ visible, 
                 <CategorySelector 
                    padding={container_padding} 
                    height={categoriesItemHeight}
-                   defaultSelectedIndex={defaultCategoryIndex} 
+                   selectedCategory={selectedCategory} 
                    categories={categories} 
-                   onCategorySelected={(c) => setSelectedCategory(c)} />
+                   onCategorySelected={setSelectedCategory} />
               </View>
               <Text style={styles.categoryTitle}>{selectedCategory.name}</Text>
               <View style={styles.flexSpacer} />
@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingHorizontal: container_padding,
-    flexDirection: 'column', // Ensure vertical layout
+    flexDirection: 'column',
   },
   topSection:
   {
