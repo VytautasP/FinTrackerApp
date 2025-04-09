@@ -20,7 +20,7 @@ const BalanceCard : React.FC<BalanceCardProps> = (props: BalanceCardProps) => {
     <Card style={styles.balanceCard}>
       <Card.Content style={styles.balanceCardContent}>
         <LinearGradient
-          colors={['#3c8ae1', '#1c59cd']}
+          colors={[appColors.widgetGradien1, appColors.widgetGradien2]}
           style={styles.gradientBackground}
         >
           <Text variant="headlineLarge" style={styles.balanceText}>

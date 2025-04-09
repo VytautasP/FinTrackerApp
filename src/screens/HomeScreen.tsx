@@ -73,7 +73,7 @@ export default HomeScreen;
 const styles = StyleSheet.create({
   safeView: {
     flex: 1,
-    backgroundColor: appColors.viewBackground.light,
+    backgroundColor: appColors.viewBackground
   },
   container: {
     flex: 1,

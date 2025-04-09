@@ -6,6 +6,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetModal, BottomSheetModalProvider, BottomSheetView } from '@gorhom/bottom-sheet';
 import CategorySelector from '../CategorySelector/CategorySelector';
 import { categories } from '../../consts/categories';
+import { appColors } from '../../consts/colors';
+import { he } from 'date-fns/locale';
 
 // Define the type for the category item
 interface CategoryItem {
@@ -165,7 +167,7 @@ const TransactionInputModal: React.FC<TransactionInputModalProps> = ({ visible, 
               <View style={styles.inputContainer}>
                 <TextInput
                   mode="outlined"
-                  label="Title"
+                  label="Transaction name"
                   value={title}
                   onChangeText={setTitle}
                   style={styles.input}
@@ -193,7 +195,7 @@ const TransactionInputModal: React.FC<TransactionInputModalProps> = ({ visible, 
                 {showDatePicker && (<DateTimePicker value={date} mode="date" display="default" onChange={handleDateChange} />)}
               </View>
 
-              <Button mode="contained" onPress={handleSave} style={styles.saveButton} labelStyle={styles.saveButtonLabel}>Add income</Button>
+              <Button mode="contained" onPress={handleSave} contentStyle={styles.saveButtonContent} style={styles.saveButton} labelStyle={styles.saveButtonLabel}>Add income</Button>
             </View>
           </View>
         </BottomSheetView>
@@ -244,7 +246,7 @@ const styles = StyleSheet.create({
   },
   input:
   {
-    marginBottom: 12,
+    marginBottom: 16,
   },
   dateContainer:
   {
@@ -274,6 +276,12 @@ const styles = StyleSheet.create({
     padding: 4,
     borderRadius: 8,
     marginTop: 16,
+    backgroundColor: appColors.white,
+  },
+  saveButtonContent:
+  {
+    backgroundColor: appColors.widgetGradien2,
+    height: 50
   },
   saveButtonLabel:
   {
