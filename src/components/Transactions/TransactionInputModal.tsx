@@ -169,27 +169,39 @@ const TransactionInputModal: React.FC<TransactionInputModalProps> = ({ visible, 
                   mode="outlined"
                   label="Transaction name"
                   value={title}
+                  outlineColor={appColors.lighGery}
+                  activeOutlineColor={appColors.black}
                   onChangeText={setTitle}
-                  style={styles.input}
+                  style={styles.textInput}
+                  outlineStyle={{backgroundColor: appColors.white}}
+                  theme={{ colors: { onSurfaceVariant: appColors.lighGery} }}
                 />
 
                 <TextInput
                   mode="outlined"
                   label="Amount"
                   value={amount}
+                  outlineColor={appColors.lighGery}
+                  activeOutlineColor={appColors.black}
                   onChangeText={setAmount}
                   keyboardType="numeric"
-                  style={styles.input}
+                  style={styles.textInput}
+                  outlineStyle={{backgroundColor: appColors.white}}
                   left={<TextInput.Affix text="€" />}
+                  theme={{ colors: { onSurfaceVariant: appColors.lighGery} }}
                 />
 
                 <TextInput
                   mode="outlined"
                   label="Date"
                   value={formatDate(date)}
-                  style={styles.input}
+                  outlineColor={appColors.lighGery}
+                  activeOutlineColor={appColors.black}
+                  style={styles.textInput}
+                  outlineStyle={{backgroundColor: appColors.white}}
                   right={<TextInput.Icon icon="calendar" />}
                   onFocus={() => setShowDatePicker(true)}
+                  theme={{ colors: { onSurfaceVariant: appColors.lighGery} }}
                 />
 
                 {showDatePicker && (<DateTimePicker value={date} mode="date" display="default" onChange={handleDateChange} />)}
@@ -244,9 +256,10 @@ const styles = StyleSheet.create({
     width: '100%',
     marginBottom: 16,
   },
-  input:
+  textInput:
   {
     marginBottom: 16,
+    color: appColors.lighGery
   },
   dateContainer:
   {

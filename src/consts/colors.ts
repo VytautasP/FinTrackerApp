@@ -2,6 +2,8 @@ import { secondsInDay } from "date-fns/constants";
 
 export const appColors = {
     viewBackground:  "#f5f5f5",
+    black: '#000000',
+    lighGery: 'rgb(188, 188, 188)',
     white : '#ffffff',
     subTitleText: '#8cafed',
     secondaryText : '#9e9e9e',
