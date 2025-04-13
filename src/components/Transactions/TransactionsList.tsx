@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, FlatList } from 'react-native';
+import { View, StyleSheet, FlatList, ViewStyle } from 'react-native';
 import { Divider, Surface, Text } from 'react-native-paper';
 import TransactionItem, { TransactionItemProps } from './TransactionItem';
 import { appColors } from '../../consts/colors';
@@ -70,9 +70,16 @@ const transactionsData: TransactionItemProps[] = [
   },
 ];
 
-const TransactionsList: React.FC = () => {
+interface TransactionListProps {
+  containerStyle?: ViewStyle;
+}
+
+const TransactionsList: React.FC<TransactionListProps> = (props: TransactionListProps) => {
+
+  const { containerStyle } = props;
+
   return (
-    <Surface style={styles.container}>
+    <Surface style={[styles.container, containerStyle]}>
       <View style={styles.header}>
         <Text style={styles.headerText}>Transactions</Text>
       </View>

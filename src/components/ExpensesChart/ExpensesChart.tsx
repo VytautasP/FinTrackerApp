@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, ViewStyle } from 'react-native';
 import { Card, Text } from 'react-native-paper';
 import { BarGroup, CartesianChart, PointsArray, useChartTransformState, useLinePath } from "victory-native";
 import { appColors } from '../../consts/colors';
@@ -19,13 +19,19 @@ const DATA = Array.from({ length: 31 }, (_, i) => {
   return dtItem;
 });
 
-const ExpensesChart: React.FC = () => {
+interface ExpensesChartProps {
+    containerStyle?: ViewStyle;
+}
+
+const ExpensesChart: React.FC<ExpensesChartProps> = (props: ExpensesChartProps) => {
+
+  const { containerStyle } = props;
 
   const transformState = useChartTransformState();
   const skFont = useFont(require("../../assets/fonts/Roboto-Regular.ttf"), 12);
 
   return (
-    <Card style={styles.chartCard}>
+    <Card style={[styles.container, containerStyle]}>
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerText}>Money flow</Text>
@@ -119,7 +125,7 @@ const ExpensesChart: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  chartCard: {
+  container: {
     marginBottom: 20,
     backgroundColor: appColors.white,
   },

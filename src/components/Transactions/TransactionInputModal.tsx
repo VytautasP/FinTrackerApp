@@ -27,6 +27,7 @@ export interface TransactionItem {
 
 export interface TransactionInputModalProps {
   visible: boolean;
+  inputTransactionText?: string;
   onDismiss: () => void;
   onSave: (transaction:
     {
@@ -42,7 +43,11 @@ export interface TransactionInputModalProps {
 const container_padding = 16;
 const defaultCategoryIndex = 1;
 
-const TransactionInputModal: React.FC<TransactionInputModalProps> = ({ visible, onDismiss, onSave }) => {
+const TransactionInputModal: React.FC<TransactionInputModalProps> = ({ 
+  visible, 
+  inputTransactionText = "Add income", 
+  onDismiss, 
+  onSave }) => {
 
   const [selectedCategory, setSelectedCategory] = useState(categories && categories[defaultCategoryIndex]);
   const [title, setTitle] = useState('');
@@ -207,7 +212,7 @@ const TransactionInputModal: React.FC<TransactionInputModalProps> = ({ visible, 
                 {showDatePicker && (<DateTimePicker value={date} mode="date" display="default" onChange={handleDateChange} />)}
               </View>
 
-              <Button mode="contained" onPress={handleSave} contentStyle={styles.saveButtonContent} style={styles.saveButton} labelStyle={styles.saveButtonLabel}>Add income</Button>
+              <Button mode="contained" onPress={handleSave} contentStyle={styles.saveButtonContent} style={styles.saveButton} labelStyle={styles.saveButtonLabel}>{inputTransactionText}</Button>
             </View>
           </View>
         </BottomSheetView>
