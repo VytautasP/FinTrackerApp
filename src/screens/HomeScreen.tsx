@@ -4,12 +4,18 @@ import { View, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
 import { Appbar } from 'react-native-paper';
 import { appColors } from '../consts/colors';
 import MonthSelector from '../components/MonthSelector/MonthSelector';
-import BalanceCard from '../components/BalanceCard/BalanceCard';
+import BalanceCard from '../components/Balance/BalanceCard';
 import ExpensesChart from '../components/ExpensesChart/ExpensesChart';
 import TransactionsList from '../components/Transactions/TransactionsList';
 import TransactionInputModal, { TransactionItem } from '../components/Transactions/TransactionInputModal';
+import BalanceSummary from '../components/Balance/BalanceSummary';
 
 const container_padding = 16;
+
+const common_styles = {
+  marginBottom: 12,
+  borderRadius: 14,
+}
 
 const HomeScreen: React.FC = () => {
  
@@ -49,12 +55,15 @@ const HomeScreen: React.FC = () => {
             initialMonth={selectedMonth}
             onMonthChange={(month) => setSelectedMonth(month)}
           /> 
-
+          
+          {/* Balance Summary */}
+          <BalanceSummary containerStyle={common_styles} />
+          
           {/* Expenses Breakdown Chart */}
-          <ExpensesChart />
+          <ExpensesChart containerStyle={common_styles} />
 
           {/* Recent Transactions */}
-          <TransactionsList />
+          <TransactionsList containerStyle={common_styles} />
         </ScrollView>
       </View>
 
