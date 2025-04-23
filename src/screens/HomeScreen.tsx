@@ -12,6 +12,11 @@ import BalanceSummary from '../components/Balance/BalanceSummary';
 
 const container_padding = 16;
 
+export enum BalanceType {
+  Income = 'income',
+  Expense = 'expense'
+}
+
 const common_styles = {
   marginBottom: 12,
   borderRadius: 14,
@@ -19,6 +24,8 @@ const common_styles = {
 
 const HomeScreen: React.FC = () => {
  
+  const [selectedTransactionCategory, setSelectedCategory] = useState(BalanceType.Income);
+  const [selectedCategoryInputText, setSelectedCategoryInputText] = useState("Add income");
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [modalVisible, setModalVisible] = useState(false);
   
@@ -28,14 +35,27 @@ const HomeScreen: React.FC = () => {
   };
   const hideModal = () => setModalVisible(false);
   
-  const handleSaveTransaction = (transaction: TransactionItem) => {
+  const handleSaveTransaction = (transaction: TransactionItem, transactionType: BalanceType) => {
     //TODO: Save the transaction to the database or state management
     console.log('Saved transaction:', transaction);
   };
 
+  const handAddIncomePress = () => {
+    setSelectedCategoryInputText("Add income");
+    setSelectedCategory(BalanceType.Income);
+    showModal();
+  }
+
+  const handAddExpensePress = () => {
+    setSelectedCategoryInputText("Add expense");
+    setSelectedCategory(BalanceType.Expense);
+    showModal();
+  }
+
   return (
     <SafeAreaView style={styles.safeView}>
       <View style={styles.container}>
+
         {/* Appbar / Top Navigation */}
         <Appbar.Header>
           <Appbar.Content title="My Finances" />
@@ -46,8 +66,8 @@ const HomeScreen: React.FC = () => {
 
           {/* Balance Card */}
           <BalanceCard
-            addIncome={showModal}
-            addExpense={() => {}}
+            addIncome={handAddIncomePress}
+            addExpense={handAddExpensePress}
           />
 
           {/* Month selector */}
@@ -69,6 +89,8 @@ const HomeScreen: React.FC = () => {
 
       <TransactionInputModal
         visible={modalVisible}
+        transactionType={selectedTransactionCategory}
+        inputTransactionText={selectedCategoryInputText}
         onDismiss={hideModal}
         onSave={handleSaveTransaction}
       />

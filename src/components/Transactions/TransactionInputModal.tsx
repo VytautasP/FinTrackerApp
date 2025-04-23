@@ -8,14 +8,9 @@ import CategorySelector from '../CategorySelector/CategorySelector';
 import { categories } from '../../consts/categories';
 import { appColors } from '../../consts/colors';
 import { he } from 'date-fns/locale';
+import { BalanceType } from '../../screens/HomeScreen';
+import { InputOutline, InputStandard } from 'react-native-input-outline';
 
-// Define the type for the category item
-interface CategoryItem {
-  id: string;
-  name: string;
-  icon: string;
-  color: string;
-}
 
 export interface TransactionItem {
   id: string;
@@ -27,34 +22,49 @@ export interface TransactionItem {
 
 export interface TransactionInputModalProps {
   visible: boolean;
+  transactionType: BalanceType,
   inputTransactionText?: string;
   onDismiss: () => void;
-  onSave: (transaction:
-    {
-      id: string;
-      category: typeof categories[number];
-      title: string;
-      amount: number;
-      date: Date;
-    }
-  ) => void;
+  onSave: (transaction: TransactionItem, transactionType: BalanceType) => void;
 }
 
 const container_padding = 16;
 const defaultCategoryIndex = 1;
 
 const TransactionInputModal: React.FC<TransactionInputModalProps> = ({ 
-  visible, 
+  visible,
+  transactionType, 
   inputTransactionText = "Add income", 
   onDismiss, 
   onSave }) => {
 
   const [selectedCategory, setSelectedCategory] = useState(categories && categories[defaultCategoryIndex]);
   const [title, setTitle] = useState('');
+  const [titleError, setTitleError] = useState<string | undefined>(undefined);
   const [amount, setAmount] = useState('');
+  const [amountError, setAmountError] = useState<string | undefined>(undefined);
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+
+  // Memoize input handlers to prevent unnecessary re-renders
+  const handleTitleChange = useCallback((text: string) => {
+    if (titleError) {
+      setTitleError(undefined);
+    }
+    setTitle(text);
+  }, [titleError]);
+
+  const handleAmountChange = useCallback((text: string) => {
+    if (amountError) {
+      setAmountError(undefined);
+    }
+    setAmount(text);
+  }, [amountError]);
+
+  const handleDateFocus = useCallback(() => {
+    setShowDatePicker(true);
+  }, []);
 
   const resetForm = useCallback(() => {
     setTitle('');
@@ -62,6 +72,8 @@ const TransactionInputModal: React.FC<TransactionInputModalProps> = ({
     setDate(new Date());
     setSelectedCategory(categories[defaultCategoryIndex]);
     setShowDatePicker(false);
+    setTitleError(undefined);
+    setAmountError(undefined);
   }, []);
 
   const formatDate = (date: Date) => {
@@ -85,17 +97,20 @@ const TransactionInputModal: React.FC<TransactionInputModalProps> = ({
   };
 
   const handleSave = () => {
-    if (title.trim() === '' || amount.trim() === '') {
+    
+    if (!isTitleValid(title) || !isAmountValid(amount)) {
       return;
     }
 
-    onSave({
+    let transactionItem = {
       id: uuidv4(),
       category: selectedCategory,
       title,
       amount: parseFloat(amount),
       date,
-    });
+    }
+
+    onSave(transactionItem, transactionType);
 
     resetForm();
     onDismiss();
@@ -131,6 +146,33 @@ const TransactionInputModal: React.FC<TransactionInputModalProps> = ({
     []
   );
 
+  const isTitleValid = (value: string): boolean => {
+
+    if (value.trim() === '') {  
+      setTitleError('Transaction name cannot be empty');
+      return false;
+    }
+    setTitleError(undefined); 
+    return true;
+
+  }
+
+  const isAmountValid = (value: string): boolean => {
+
+    const numericRegex = /^[0-9]*\.?[0-9]*$/;
+    if (value === '') {
+      setAmountError('Amount cannot be empty');
+      return false;
+    } else if (!numericRegex.test(value)) {
+      setAmountError('Invalid amount format');
+      return false;
+    } else {
+      setAmountError(undefined);
+      return true;
+    }
+
+  }
+
   useEffect(() => {
 
     if (visible) {
@@ -156,13 +198,13 @@ const TransactionInputModal: React.FC<TransactionInputModalProps> = ({
 
           <View style={styles.container}>
             <View style={styles.topSection} >
-              <View style= {{height: categoriesItemHeight}}>
-                <CategorySelector 
-                   padding={container_padding} 
-                   height={categoriesItemHeight}
-                   selectedCategory={selectedCategory} 
-                   categories={categories} 
-                   onCategorySelected={setSelectedCategory} />
+              <View style={{ height: categoriesItemHeight }}>
+                <CategorySelector
+                  padding={container_padding}
+                  height={categoriesItemHeight}
+                  selectedCategory={selectedCategory}
+                  categories={categories}
+                  onCategorySelected={setSelectedCategory} />
               </View>
               <Text style={styles.categoryTitle}>{selectedCategory.name}</Text>
               <View style={styles.flexSpacer} />
@@ -170,43 +212,41 @@ const TransactionInputModal: React.FC<TransactionInputModalProps> = ({
 
             <View style={styles.bottomSection}>
               <View style={styles.inputContainer}>
-                <TextInput
-                  mode="outlined"
-                  label="Transaction name"
+
+                <InputOutline
                   value={title}
-                  outlineColor={appColors.lighGery}
-                  activeOutlineColor={appColors.black}
-                  onChangeText={setTitle}
+                  error={titleError}
+                  onChangeText={handleTitleChange}
+                  placeholder="Transaction name"
+                  activeColor={appColors.black}
+                  paddingVertical={5}
+                  inactiveColor={appColors.lighGery}
                   style={styles.textInput}
-                  outlineStyle={{backgroundColor: appColors.white}}
-                  theme={{ colors: { onSurfaceVariant: appColors.lighGery} }}
+                  multiline={false}
                 />
 
-                <TextInput
-                  mode="outlined"
-                  label="Amount"
+                <InputOutline
                   value={amount}
-                  outlineColor={appColors.lighGery}
-                  activeOutlineColor={appColors.black}
-                  onChangeText={setAmount}
-                  keyboardType="numeric"
+                  error={amountError}
+                  onChangeText={handleAmountChange} // Ensure this uses the updated handler
+                  placeholder="Amount"
+                  activeColor={appColors.black}
+                  paddingVertical={5}
+                  inactiveColor={appColors.lighGery}
                   style={styles.textInput}
-                  outlineStyle={{backgroundColor: appColors.white}}
-                  left={<TextInput.Affix text="€" />}
-                  theme={{ colors: { onSurfaceVariant: appColors.lighGery} }}
+                  keyboardType='numeric'
                 />
 
-                <TextInput
-                  mode="outlined"
-                  label="Date"
+                <InputOutline
                   value={formatDate(date)}
-                  outlineColor={appColors.lighGery}
-                  activeOutlineColor={appColors.black}
+                  onChangeText={handleAmountChange}
+                  placeholder="Date"
+                  activeColor={appColors.black}
+                  paddingVertical={5}
+                  inactiveColor={appColors.lighGery}
                   style={styles.textInput}
-                  outlineStyle={{backgroundColor: appColors.white}}
-                  right={<TextInput.Icon icon="calendar" />}
-                  onFocus={() => setShowDatePicker(true)}
-                  theme={{ colors: { onSurfaceVariant: appColors.lighGery} }}
+                  onPressIn={handleDateFocus}
+                  trailingIcon={() => <IconButton icon="calendar" onPress={handleDateFocus} />}
                 />
 
                 {showDatePicker && (<DateTimePicker value={date} mode="date" display="default" onChange={handleDateChange} />)}
@@ -235,6 +275,7 @@ const styles = StyleSheet.create({
   topSection:
   {
     marginTop: 50,
+    marginBottom: 22,
     flex: 1,
     width: '100%',
     justifyContent: 'center',
@@ -263,8 +304,13 @@ const styles = StyleSheet.create({
   },
   textInput:
   {
-    marginBottom: 16,
+    marginBottom: 22,
+    //height: 45,
     color: appColors.lighGery
+  },
+  currencySymbol: {
+    fontSize: 16,
+    marginRight: 8,
   },
   dateContainer:
   {
