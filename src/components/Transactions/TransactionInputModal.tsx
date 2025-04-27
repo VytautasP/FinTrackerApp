@@ -98,7 +98,17 @@ const TransactionInputModal: React.FC<TransactionInputModalProps> = ({
 
   const handleSave = () => {
     
-    if (!isTitleValid(title) || !isAmountValid(amount)) {
+    let isValid = true
+
+    const validationHandlers = [() => isTitleValid(title), () => isAmountValid(amount)];
+
+    validationHandlers.forEach((handler) => {
+      if (!handler()) {
+        isValid = false;
+      }
+    });
+
+    if (!isValid) {
       return;
     }
 
