@@ -3,15 +3,17 @@ import { View, StyleSheet } from 'react-native';
 import { Button, Card, Text } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import { appColors } from '../../consts/colors';
+import { formatNumber } from '../../helpers/numberUtils';
 
 interface BalanceCardProps {
+  monthTotal: number;
   addIncome: () => void;
   addExpense: () => void;
 }
 
 const BalanceCard : React.FC<BalanceCardProps> = (props: BalanceCardProps) => {
 
-  const { addIncome, addExpense} = props;
+  const { monthTotal, addIncome, addExpense} = props;
 
   return (
     <Card style={styles.balanceCard}>
@@ -21,7 +23,7 @@ const BalanceCard : React.FC<BalanceCardProps> = (props: BalanceCardProps) => {
           style={styles.gradientBackground}
         >
           <Text variant="headlineLarge" style={styles.balanceText}>
-            $5,000
+            €{formatNumber(monthTotal)}
           </Text>
           <Text variant="bodySmall" style={styles.cardSubtitle}>
             total month balances
