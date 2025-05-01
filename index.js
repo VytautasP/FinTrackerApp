@@ -10,17 +10,20 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import HomeScreen from './src/screens/HomeScreen';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { DatabaseProvider } from './src/services/database/DatabaseContext';
 
 export default function Main() {
   return (
     <SafeAreaProvider>
       <PaperProvider>
-      <GestureHandlerRootView>
-        <BottomSheetModalProvider>
-           {/* App */}
-          <HomeScreen />
-        </BottomSheetModalProvider>
-      </GestureHandlerRootView>  
+        <GestureHandlerRootView>
+          <BottomSheetModalProvider>
+            <DatabaseProvider>
+              {/* App */}
+              <HomeScreen />
+            </DatabaseProvider>
+          </BottomSheetModalProvider>
+        </GestureHandlerRootView>
       </PaperProvider>
     </SafeAreaProvider>
   );
