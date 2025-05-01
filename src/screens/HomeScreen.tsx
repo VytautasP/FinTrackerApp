@@ -1,5 +1,5 @@
 // HomeScreen.js
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react'; // Import useEffect and useCallback
 import { View, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
 import { Appbar } from 'react-native-paper';
 import { appColors } from '../consts/colors';
@@ -9,6 +9,8 @@ import ExpensesChart from '../components/ExpensesChart/ExpensesChart';
 import TransactionsList from '../components/Transactions/TransactionsList';
 import TransactionInputModal, { TransactionItem } from '../components/Transactions/TransactionInputModal';
 import BalanceSummary from '../components/Balance/BalanceSummary';
+import { useDatabase } from '../services/database/DatabaseContext';
+import { MonthlySummary } from '../services/database/DatabaseService';
 
 const container_padding = 16;
 
@@ -23,21 +25,32 @@ const common_styles = {
 }
 
 const HomeScreen: React.FC = () => {
- 
+  const dbContext = useDatabase();
   const [selectedTransactionCategory, setSelectedCategory] = useState(BalanceType.Income);
   const [selectedCategoryInputText, setSelectedCategoryInputText] = useState("Add income");
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [modalVisible, setModalVisible] = useState(false);
-  
+
+  const [balanceSummaryData, setBalanceSummaryData] = useState<MonthlySummary>({ income: 0, expense: 0, balance: 0 });
+  const [chartData, setChartData] = useState([]); // Adjust type based on expected chart data structure
+  const [transactions, setTransactions] = useState<TransactionItem[]>([]); // Assuming TransactionItem is defined elsewhere
+
   const showModal = () => {
     console.log('Show modal');
     setModalVisible(true);
   };
   const hideModal = () => setModalVisible(false);
-  
-  const handleSaveTransaction = (transaction: TransactionItem, transactionType: BalanceType) => {
-    //TODO: Save the transaction to the database or state management
-    console.log('Saved transaction:', transaction);
+
+  const handleSaveTransaction = async (transaction: TransactionItem, transactionType: BalanceType) => {
+    try {
+      await dbContext.transactions.add(transaction.title, transaction.amount, transaction.category.id, transaction.date, transactionType);
+      console.log('Saved transaction:', transaction);
+      // Reload data after saving
+      await loadUiData(selectedMonth);
+    } catch (error) {
+      console.error("Failed to save transaction:", error);
+      // Handle error appropriately (e.g., show a message to the user)
+    }
   };
 
   const handAddIncomePress = () => {
@@ -51,6 +64,37 @@ const HomeScreen: React.FC = () => {
     setSelectedCategory(BalanceType.Expense);
     showModal();
   }
+
+  // Memoized function to load UI data
+  const loadUiData = useCallback(async (month: Date) => {
+    if (!dbContext) return; // Ensure dbContext is available
+
+    console.log("Loading UI data for month:", month);
+    try {
+ 
+      const summary = await dbContext.summaries.getMonthly(month.getFullYear(), month.getMonth());
+      //const expensesByCategory = await dbContext.transactions.getExpensesByCategoryForMonth(month);
+      //const monthlyTransactions = await dbContext.transactions.getTransactionsForMonth(month);
+
+      setBalanceSummaryData(summary || { income: 0, expense: 0 });
+      //setChartData(expensesByCategory || []);
+      //setTransactions(monthlyTransactions || []);
+
+    } catch (error) {
+
+      console.error("Failed to load UI data:", error);
+      // Handle errors appropriately
+      setBalanceSummaryData({ income: 0, expense: 0, balance: 0 });
+      setChartData([]);
+      setTransactions([]);
+
+    }
+  }, [dbContext]); 
+
+  // useEffect to load data on mount and when selectedMonth or dbContext changes
+  useEffect(() => {
+    loadUiData(selectedMonth);
+  }, [selectedMonth, loadUiData]); // Dependencies: selectedMonth and the memoized loadUiData function
 
   return (
     <SafeAreaView style={styles.safeView}>
@@ -66,6 +110,7 @@ const HomeScreen: React.FC = () => {
 
           {/* Balance Card */}
           <BalanceCard
+            monthTotal={balanceSummaryData.balance} // Use state variable
             addIncome={handAddIncomePress}
             addExpense={handAddExpensePress}
           />
@@ -77,13 +122,23 @@ const HomeScreen: React.FC = () => {
           /> 
           
           {/* Balance Summary */}
-          <BalanceSummary containerStyle={common_styles} />
+          <BalanceSummary
+            containerStyle={common_styles}
+            //income={balanceSummaryData.income} // Pass fetched data
+            //expense={balanceSummaryData.expense} // Pass fetched data
+          />
           
           {/* Expenses Breakdown Chart */}
-          <ExpensesChart containerStyle={common_styles} />
+          <ExpensesChart
+            containerStyle={common_styles}
+            //data={chartData} // Pass fetched data
+          />
 
           {/* Recent Transactions */}
-          <TransactionsList containerStyle={common_styles} />
+          <TransactionsList
+            containerStyle={common_styles}
+           //transactions={transactions} // Pass fetched data
+          />
         </ScrollView>
       </View>
 
