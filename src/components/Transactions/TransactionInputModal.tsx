@@ -1,15 +1,15 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, Alert, Dimensions, FlatList } from 'react-native';
-import { Text, Button, TextInput, Avatar, IconButton, Surface, TouchableRipple } from 'react-native-paper';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { View, StyleSheet, Dimensions } from 'react-native';
+import { Text, Button, IconButton } from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { v4 as uuidv4 } from 'uuid';
+import 'react-native-get-random-values';
+import { v7 as uuidv7 } from 'uuid';
 import { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetModal, BottomSheetModalProvider, BottomSheetView } from '@gorhom/bottom-sheet';
 import CategorySelector from '../CategorySelector/CategorySelector';
 import { categories } from '../../consts/categories';
 import { appColors } from '../../consts/colors';
-import { he } from 'date-fns/locale';
 import { BalanceType } from '../../screens/HomeScreen';
-import { InputOutline, InputStandard } from 'react-native-input-outline';
+import { InputOutline } from 'react-native-input-outline';
 
 
 export interface TransactionItem {
@@ -113,7 +113,7 @@ const TransactionInputModal: React.FC<TransactionInputModalProps> = ({
     }
 
     let transactionItem = {
-      id: uuidv4(),
+      id: uuidv7(),
       category: selectedCategory,
       title,
       amount: parseFloat(amount),
