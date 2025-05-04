@@ -3,14 +3,17 @@ import { View, StyleSheet, ViewStyle } from 'react-native';
 import { Surface, Text, useTheme } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { appColors } from '../../consts/colors';
+import { formatNumber } from '../../helpers/numberUtils';
 
 interface BalanceSummaryProps {
     containerStyle?: ViewStyle;
+    income?: number;
+    expense?: number;
 }
 
 const BalanceSummary : React.FC<BalanceSummaryProps> = (props: BalanceSummaryProps) => {
 
-    const { containerStyle } = props;
+    const { containerStyle, income, expense } = props;
 
   return (
     <Surface style={[styles.container, containerStyle]}>
@@ -25,7 +28,7 @@ const BalanceSummary : React.FC<BalanceSummaryProps> = (props: BalanceSummaryPro
             />
           </View>
           <View style={styles.textContainer}>
-            <Text variant="titleLarge" style={styles.amount}>€1,500</Text>
+            <Text variant="titleLarge" style={styles.amount}>€ {formatNumber(income ?? 0)}</Text>
             <Text variant="bodyMedium" style={styles.label}>Income</Text>
           </View>
         </View>
@@ -43,7 +46,7 @@ const BalanceSummary : React.FC<BalanceSummaryProps> = (props: BalanceSummaryPro
             />
           </View>
           <View style={styles.textContainer}>
-            <Text variant="titleLarge" style={styles.amount}>€320</Text>
+            <Text variant="titleLarge" style={styles.amount}>€{formatNumber(expense ?? 0)}</Text>
             <Text variant="bodyMedium" style={styles.label}>Expenses</Text>
           </View>
         </View>
