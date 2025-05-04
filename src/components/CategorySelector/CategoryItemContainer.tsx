@@ -33,7 +33,7 @@ const CategoryItemContainer : React.FC<CategoryItemProps> = (props: CategoryItem
                         { backgroundColor: item.color },
                         isSelected ? sytles.selectedAvatar : {}
                     ]} 
-                    color="#000" 
+                    //color="#000" 
                   />
                 </TouchableOpacity>
             </View>
