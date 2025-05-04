@@ -10,7 +10,7 @@ import TransactionsList from '../components/Transactions/TransactionsList';
 import TransactionInputModal, { TransactionItem } from '../components/Transactions/TransactionInputModal';
 import BalanceSummary from '../components/Balance/BalanceSummary';
 import { useDatabase } from '../services/database/DatabaseContext';
-import { MonthlySummary } from '../services/database/DatabaseService';
+import { MonthlySummary, Transaction } from '../services/database/DatabaseService';
 
 const container_padding = 16;
 
@@ -33,7 +33,7 @@ const HomeScreen: React.FC = () => {
 
   const [balanceSummaryData, setBalanceSummaryData] = useState<MonthlySummary>({ income: 0, expense: 0, balance: 0 });
   const [chartData, setChartData] = useState([]); // Adjust type based on expected chart data structure
-  const [transactions, setTransactions] = useState<TransactionItem[]>([]); // Assuming TransactionItem is defined elsewhere
+  const [transactions, setTransactions] = useState<Transaction[]>([]); // Assuming TransactionItem is defined elsewhere
 
   const showModal = () => {
     console.log('Show modal');
@@ -72,11 +72,15 @@ const HomeScreen: React.FC = () => {
     console.log("Loading UI data for month:", month);
     try {
  
-      const summary = await dbContext.summaries.getMonthly(month.getFullYear(), month.getMonth());
-      //const expensesByCategory = await dbContext.transactions.getExpensesByCategoryForMonth(month);
-      //const monthlyTransactions = await dbContext.transactions.getTransactionsForMonth(month);
+      const year = month.getFullYear();
+      const monthNumber = month.getMonth() + 1; // Months are 0-indexed in JavaScript
 
-      setBalanceSummaryData(summary || { income: 0, expense: 0 });
+      const summary = await dbContext.summaries.getMonthly(year, monthNumber);
+      //const expensesByCategory = await dbContext.transactions.getExpensesByCategoryForMonth(month);
+      const monthlyTransactions = await dbContext.transactions.getByMonth(year, monthNumber);
+
+      setTransactions(monthlyTransactions || []);
+      setBalanceSummaryData(summary || { income: 0, expense: 0, balance: 0 });
       //setChartData(expensesByCategory || []);
       //setTransactions(monthlyTransactions || []);
 
@@ -124,8 +128,8 @@ const HomeScreen: React.FC = () => {
           {/* Balance Summary */}
           <BalanceSummary
             containerStyle={common_styles}
-            //income={balanceSummaryData.income} // Pass fetched data
-            //expense={balanceSummaryData.expense} // Pass fetched data
+            income={balanceSummaryData.income} // Pass fetched data
+            expense={balanceSummaryData.expense} // Pass fetched data
           />
           
           {/* Expenses Breakdown Chart */}
@@ -137,7 +141,7 @@ const HomeScreen: React.FC = () => {
           {/* Recent Transactions */}
           <TransactionsList
             containerStyle={common_styles}
-           //transactions={transactions} // Pass fetched data
+            transactions={transactions} // Pass fetched data
           />
         </ScrollView>
       </View>
