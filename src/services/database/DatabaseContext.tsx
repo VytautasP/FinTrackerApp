@@ -5,6 +5,9 @@ interface DatabaseContextValue    {
   db: DatabaseService | null;
   isLoading: boolean;
   error: Error | null;
+  debug: {
+    debugDumpTable: (tableName: string) => Promise<void>;
+  };
   transactions: {
     add: (name: string, amount: number, category: string, date: Date, type: 'income' | 'expense') => Promise<number>;
     getAll: () => Promise<Transaction[]>;
@@ -72,6 +75,7 @@ export const DatabaseProvider: React.FC<DatabaseProviderProps> = ({ children }) 
     db: dbService,
     isLoading,
     error,
+    debug: {debugDumpTable: async(tableName: string) => await dbService.debugDumpTable(tableName)},
     transactions: {
       add: async (name, amount, category, date, type) => {
         return await dbService.addTransaction(name, amount, category, date, type);
@@ -122,5 +126,8 @@ export const useDatabase = (): DatabaseContextValue => {
   if (!context) {
     throw new Error('useDatabase must be used within a DatabaseProvider');
   }
+
+  context.db!.debugSqlResultsEnabled = true;
+
   return context;
 };
