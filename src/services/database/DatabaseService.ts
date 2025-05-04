@@ -40,6 +40,7 @@ export default class DatabaseService {
    * @type {SQLite.SQLiteDatabase | null}
    */
   database: SQLite.SQLiteDatabase | null = null;
+  debugSqlResultsEnabled: boolean = false;
 
   /**
    * Initialize the database
@@ -148,9 +149,11 @@ export default class DatabaseService {
     }
     
     try {
-      const [results] = await this.database.executeSql(
-        'SELECT * FROM transactions ORDER BY date DESC'
-      );
+      
+      const sql = `SELECT * FROM transactions ORDER BY date DESC`;
+      const [results] = await this.database.executeSql(sql);
+
+      this.debugDumpSqlResults(sql, results);
       
       const transactions: Transaction[] = [];
       for (let i = 0; i < results.rows.length; i++) {
@@ -318,22 +321,22 @@ export default class DatabaseService {
       }
       const endDate: string = `${nextYear}-${nextMonth}-01`;
       
+      const incomeQuery = `SELECT SUM(amount) as total 
+         FROM transactions 
+         WHERE date >= ? AND date < ? AND type = 'income'`;
+
       // Get total income
-      const [incomeResult] = await this.database.executeSql(
-        `SELECT SUM(amount) as total 
-         FROM transactions 
-         WHERE date >= ? AND date < ? AND type = 'income'`,
-        [startDate, endDate]
-      );
+      const [incomeResult] = await this.database.executeSql(incomeQuery,[startDate, endDate]);
+      this.debugDumpSqlResults(incomeQuery, incomeResult);
       
+      const expenseQuery = `SELECT SUM(amount) as total 
+         FROM transactions 
+         WHERE date >= ? AND date < ? AND type = 'expense'`;
+
       // Get total expense
-      const [expenseResult] = await this.database.executeSql(
-        `SELECT SUM(amount) as total 
-         FROM transactions 
-         WHERE date >= ? AND date < ? AND type = 'expense'`,
-        [startDate, endDate]
-      );
-      
+      const [expenseResult] = await this.database.executeSql(expenseQuery,[startDate, endDate]);
+      this.debugDumpSqlResults(expenseQuery, expenseResult);
+
       const totalIncome: number = parseFloat(incomeResult.rows.item(0).total || 0);
       const totalExpense: number = parseFloat(expenseResult.rows.item(0).total || 0);
       
@@ -442,14 +445,15 @@ export default class DatabaseService {
       }
       const endDate: string = `${nextYear}-${nextMonth}-01`;
       
-      const [results] = await this.database.executeSql(
-        `SELECT category, SUM(amount) as total 
+      const sqlQuery = `SELECT category, SUM(amount) as total 
          FROM transactions 
          WHERE date >= ? AND date < ? AND type = ? 
          GROUP BY category 
-         ORDER BY total DESC`,
-        [startDate, endDate, type]
-      );
+         ORDER BY total DESC`;
+         
+      const [results] = await this.database.executeSql(sqlQuery,[startDate, endDate, type]);
+
+      this.debugDumpSqlResults(sqlQuery, results);
       
       const categoryTotals: CategoryTotal[] = [];
       for (let i = 0; i < results.rows.length; i++) {
@@ -465,5 +469,68 @@ export default class DatabaseService {
       console.error('Error getting category totals:', error);
       throw new Error('Failed to get category totals');
     }
+  }
+
+  /**
+   * [DEBUG] Dumps the content of a table to the console.
+   * @param {string} tableName - The name of the table to dump.
+   * @returns {Promise<void>}
+   */
+  async debugDumpTable(tableName: string): Promise<void> {
+
+    if (!this.database) {
+      console.error('[DEBUG] Database not initialized');
+      return;
+    }
+
+    console.log(`[DEBUG] Dumping content of table: ${tableName}`);
+    try 
+    {
+      const [results] = await this.database.executeSql(`SELECT * FROM ${tableName}`);
+      
+      if (results.rows.length === 0) {
+        console.log(`[DEBUG] Table ${tableName} is empty.`);
+        return;
+      }
+
+      const items = [];
+      for (let i = 0; i < results.rows.length; i++) {
+        items.push(results.rows.item(i));
+      }
+      
+      console.log(`[DEBUG] Table ${tableName} row count: ${results.rows.length}`);
+      console.log(`[DEBUG] Table ${tableName} content:`);
+      console.log(results.rows.raw()); // Use raw() to get all rows as an array
+
+    } catch (error: any) 
+    {
+      console.error(`[DEBUG] Error dumping table ${tableName}:`, error);
+    }
+  }
+
+  async debugDumpSqlResults(sql: string, results: SQLite.ResultSet): Promise<void> {
+    
+    if (!this.debugSqlResultsEnabled) return;
+
+    if (!this.database) {
+      console.error('[DEBUG] Database not initialized');
+      return;
+    }
+
+    console.log(`[DEBUG] Executed SQL: ${sql}`);
+    if (results.rows.length === 0) {
+      console.log(`[DEBUG] No results returned.`);
+      return;
+    }
+
+    const items = [];
+    for (let i = 0; i < results.rows.length; i++) {
+      items.push(results.rows.item(i));
+    }
+    
+    console.log(`[DEBUG] SQL result row count: ${results.rows.length}`);
+    console.log(`[DEBUG] SQL result content:`);
+    console.log(results.rows.raw()); // Use raw() to get all rows as an array
+
   }
 }
