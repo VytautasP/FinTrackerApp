@@ -13,6 +13,7 @@ export const appColors = {
     incomeBar: 'rgba(122, 209, 72, 0.66)',
     expenseBar: 'rgba(255, 1, 1, 0.55)',
     widgetHeaderText : 'rgba(0, 0, 0, 0.71)',
+    icons : 'rgba(0, 0, 0, 0.71)',
     widgetGradien1: 'rgb(60, 138, 225)',
     widgetGradien2: 'rgb(28, 89, 205)',
 

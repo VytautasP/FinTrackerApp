@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import React from 'react'
 import { Avatar } from 'react-native-paper';
 import { CategoryItem } from '../../consts/categories';
+import { appColors } from '../../consts/colors';
 
 interface CategoryItemProps {
     item: CategoryItem;
@@ -33,7 +34,7 @@ const CategoryItemContainer : React.FC<CategoryItemProps> = (props: CategoryItem
                         { backgroundColor: item.color },
                         isSelected ? sytles.selectedAvatar : {}
                     ]} 
-                    //color="#000" 
+                    color={appColors.icons} 
                   />
                 </TouchableOpacity>
             </View>

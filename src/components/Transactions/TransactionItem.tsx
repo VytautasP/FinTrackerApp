@@ -30,7 +30,7 @@ const TransactionItem: React.FC<TransactionItemProps> = (props: TransactionItemP
           size={40} 
           icon={category.icon}
           style={{ backgroundColor: category.color}}
-          //color="#000" 
+          color={appColors.icons} 
         />
         <View style={styles.transactionDetails}>
           <Text style={styles.merchantName}>{category.name}</Text>
