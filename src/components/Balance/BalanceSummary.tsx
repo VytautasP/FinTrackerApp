@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, ViewStyle } from 'react-native';
+import { View, StyleSheet, ViewStyle, TouchableOpacity } from 'react-native';
 import { Surface, Text, useTheme } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { appColors } from '../../consts/colors';
@@ -9,11 +9,13 @@ interface BalanceSummaryProps {
     containerStyle?: ViewStyle;
     income?: number;
     expense?: number;
+    addIncome: () => void;
+    addExpense: () => void;
 }
 
 const BalanceSummary : React.FC<BalanceSummaryProps> = (props: BalanceSummaryProps) => {
 
-    const { containerStyle, income, expense } = props;
+    const { containerStyle, income, expense, addIncome, addExpense } = props;
 
   return (
     <Surface style={[styles.container, containerStyle]}>
@@ -21,11 +23,13 @@ const BalanceSummary : React.FC<BalanceSummaryProps> = (props: BalanceSummaryPro
         {/* Income Section */}
         <View style={styles.item}>
           <View style={[styles.iconContainer, { backgroundColor: '#E6F7F0' }]}>
-            <Icon 
-              name="plus" 
-              size={20} 
-              color={appColors.incomeBar}
-            />
+            <TouchableOpacity onPress={addIncome}>
+              <Icon
+                name="plus"
+                size={20}
+                color={appColors.incomeBar}
+              />
+            </TouchableOpacity>
           </View>
           <View style={styles.textContainer}>
             <Text variant="titleLarge" style={styles.amount}>€ {formatNumber(income ?? 0)}</Text>
@@ -39,11 +43,13 @@ const BalanceSummary : React.FC<BalanceSummaryProps> = (props: BalanceSummaryPro
         {/* Expenses Section */}
         <View style={styles.item}>
           <View style={[styles.iconContainer, { backgroundColor: '#FEECEF' }]}>
-            <Icon 
-              name="minus" 
-              size={20} 
-              color={appColors.expenseBar}
-            />
+            <TouchableOpacity onPress={addExpense}>
+              <Icon
+                name="minus"
+                size={20}
+                color={appColors.expenseBar}
+              />
+            </TouchableOpacity>
           </View>
           <View style={styles.textContainer}>
             <Text variant="titleLarge" style={styles.amount}>€{formatNumber(expense ?? 0)}</Text>
