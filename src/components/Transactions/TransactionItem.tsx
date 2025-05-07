@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Avatar, Text } from 'react-native-paper';
+import { Avatar, Text, IconButton } from 'react-native-paper';
 import { appColors } from '../../consts/colors';
 import { Transaction } from '../../services/database/DatabaseService';
 import { BalanceType } from '../../screens/HomeScreen';
@@ -10,12 +10,18 @@ import { formatDate } from 'date-fns';
 // Export the interface so it can be used in TransactionsList
 export interface TransactionItemProps {
   transaction: Transaction
+  onDeleteTransaction: (item: Transaction) => void;
 }
 
 const TransactionItem: React.FC<TransactionItemProps> = (props: TransactionItemProps) => {
 
-  const { transaction } = props;
+  const { transaction, onDeleteTransaction } = props;
   const category = getCategoryById(transaction.category);
+  const [isDeletePressed, setIsDeletePressed] = useState(false);
+
+  const onDeleteTransactionHandler = () => {
+    onDeleteTransaction(transaction);
+  };
 
   return (
     <View style={styles.transactionItem}>
@@ -28,12 +34,26 @@ const TransactionItem: React.FC<TransactionItemProps> = (props: TransactionItemP
         />
         <View style={styles.transactionDetails}>
           <Text style={styles.merchantName}>{category.name}</Text>
-          <Text style={styles.transactionInfo}>{formatDate(transaction.date, "yyyy-MM-dd")}</Text>
+          <Text style={styles.transactionDescription}>{transaction.name}</Text>
+          <Text style={styles.transactionDate}>{formatDate(transaction.date, "yyyy-MM-dd")}</Text>
         </View>
       </View>
-      <Text style={[styles.amount, { color: transaction.type === BalanceType.Expense ? 'red' : 'green' }]}>
-         {transaction.type === BalanceType.Expense? '-€' : '+€'}{transaction.amount.toLocaleString()}
-      </Text>
+      <View style={styles.rightContainer}>
+        <Text style={[styles.amount, { color: transaction.type === BalanceType.Expense ? 'red' : 'green' }]}>
+           {transaction.type === BalanceType.Expense? '-€' : '+€'}{transaction.amount.toLocaleString()}
+        </Text>
+        <IconButton
+          icon="delete"
+          iconColor={isDeletePressed ? 'red' : appColors.secondaryText}
+          size={20}
+          onPressIn={() => setIsDeletePressed(true)}
+          onPressOut={() => {
+            setIsDeletePressed(false);
+            onDeleteTransactionHandler();
+          }}
+          style={isDeletePressed ? { transform: [{ scale: 1.2 }] } : {}}
+        />
+      </View>
     </View>
   );
 };
@@ -50,6 +70,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  rightContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   transactionDetails: {
     marginLeft: 12,
   },
@@ -57,13 +81,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
   },
-  transactionInfo: {
+  transactionDescription: {
+    fontSize: 13,
+    color: appColors.secondaryText,
+  },
+  transactionDate: {
     fontSize: 12,
     color: appColors.secondaryText,
   },
   amount: {
     fontSize: 14,
     fontWeight: '500',
+    marginRight: 8, // Add some space between amount and delete button
   },
 });
 
