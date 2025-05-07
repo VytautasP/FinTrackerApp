@@ -11,6 +11,7 @@ import HomeScreen from './src/screens/HomeScreen';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { DatabaseProvider } from './src/services/database/DatabaseContext';
+import Toast from 'react-native-toast-message';
 
 export default function Main() {
   return (
@@ -21,6 +22,7 @@ export default function Main() {
             <DatabaseProvider>
               {/* App */}
               <HomeScreen />
+              <Toast />
             </DatabaseProvider>
           </BottomSheetModalProvider>
         </GestureHandlerRootView>
