@@ -26,7 +26,7 @@ const BalanceCard : React.FC<BalanceCardProps> = (props: BalanceCardProps) => {
             €{formatNumber(monthTotal)}
           </Text>
           <Text variant="bodySmall" style={styles.cardSubtitle}>
-            total month balances
+            total month's balances
           </Text>
         </LinearGradient>
       </Card.Content>
