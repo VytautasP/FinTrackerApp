@@ -1,5 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import DatabaseService, { Transaction, MonthlySummary, DailyTotal, CategoryTotal } from './DatabaseService';
+import { View, Text } from 'react-native';
+import { ActivityIndicator } from 'react-native-paper';
+import { appColors } from '../../consts/colors';
 
 interface DatabaseContextValue    {
   db: DatabaseService | null;
@@ -31,7 +34,8 @@ interface DatabaseProviderProps {
 const DatabaseLoading = () => {
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Initializing database...</Text>
+      <ActivityIndicator animating={true} size={100} color={appColors.widgetGradien2} />
+      <Text style={{ marginTop: 10, fontSize: 16 }}>Loading...</Text>
     </View>
   );
 };
@@ -44,8 +48,6 @@ const DatabaseError = ({ message }: { message: string }) => {
     </View>
   );
 };
-
-import { View, Text } from 'react-native';
 
 export const DatabaseProvider: React.FC<DatabaseProviderProps> = ({ children }) => {
 
