@@ -10,7 +10,8 @@ import TransactionsList from '../components/Transactions/TransactionsList';
 import TransactionInputModal, { TransactionItem } from '../components/Transactions/TransactionInputModal';
 import BalanceSummary from '../components/Balance/BalanceSummary';
 import { useDatabase } from '../services/database/DatabaseContext';
-import { MonthlySummary, Transaction } from '../services/database/DatabaseService';
+import { DailyTotal, MonthlySummary, Transaction } from '../services/database/DatabaseService';
+import Toast from 'react-native-toast-message';
 
 const container_padding = 16;
 
@@ -32,11 +33,10 @@ const HomeScreen: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
 
   const [balanceSummaryData, setBalanceSummaryData] = useState<MonthlySummary>({ income: 0, expense: 0, balance: 0 });
-  const [chartData, setChartData] = useState([]); // Adjust type based on expected chart data structure
-  const [transactions, setTransactions] = useState<Transaction[]>([]); // Assuming TransactionItem is defined elsewhere
+  const [chartData, setChartData] = useState<DailyTotal[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   const showModal = () => {
-    console.log('Show modal');
     setModalVisible(true);
   };
   const hideModal = () => setModalVisible(false);
@@ -44,12 +44,11 @@ const HomeScreen: React.FC = () => {
   const handleSaveTransaction = async (transaction: TransactionItem, transactionType: BalanceType) => {
     try {
       await dbContext.transactions.add(transaction.title, transaction.amount, transaction.category.id, transaction.date, transactionType);
-      console.log('Saved transaction:', transaction);
-      // Reload data after saving
       await loadUiData(selectedMonth);
+      showToast('success', 'Success', 'Transaction saved successfully!');
     } catch (error) {
       console.error("Failed to save transaction:", error);
-      // Handle error appropriately (e.g., show a message to the user)
+      showToast('error', 'Error', 'Failed to save transaction. Please try again.');
     }
   };
 
@@ -65,29 +64,48 @@ const HomeScreen: React.FC = () => {
     showModal();
   }
 
-  // Memoized function to load UI data
-  const loadUiData = useCallback(async (month: Date) => {
-    if (!dbContext) return; // Ensure dbContext is available
+  const handleDeleteTransaction = async (item: Transaction) => {
+    try {
+      await dbContext.transactions.delete(item.id);
+      await loadUiData(selectedMonth);
+      showToast('success', 'Success', 'Transaction deleted successfully!');
+    }
+    catch (error) {
+      console.error("Failed to delete transaction:", error);
+      showToast('error', 'Error', 'Failed to delete transaction. Please try again.');
+    }
+  }
 
-    console.log("Loading UI data for month:", month);
+  const showToast = (type: string, message1: string, message2: string) => {
+    Toast.show({
+      type: type,
+      text1: message1,
+      text2: message2,
+      position: 'top',
+      visibilityTime: 3000,
+    });
+  }
+
+  // Memoized function to load UI data
+  const loadUiData = useCallback(async (monthDate: Date) => {
+    if (!dbContext) return; // Ensure dbContext is available
     try {
  
-      const year = month.getFullYear();
-      const monthNumber = month.getMonth() + 1; // Months are 0-indexed in JavaScript
+      const currentYear = monthDate.getFullYear();
+      const currentMonthNumber = monthDate.getMonth() + 1; // Months are 0-indexed in JavaScript
 
-      const summary = await dbContext.summaries.getMonthly(year, monthNumber);
-      //const expensesByCategory = await dbContext.transactions.getExpensesByCategoryForMonth(month);
-      const monthlyTransactions = await dbContext.transactions.getByMonth(year, monthNumber);
+      const summary = await dbContext.summaries.getMonthly(currentYear, currentMonthNumber);
+      const dailyExpenses = await dbContext.summaries.getDailyTotals(currentYear, currentMonthNumber);
+      const monthlyTransactions = await dbContext.transactions.getByMonth(currentYear, currentMonthNumber);
 
       setTransactions(monthlyTransactions || []);
       setBalanceSummaryData(summary || { income: 0, expense: 0, balance: 0 });
-      //setChartData(expensesByCategory || []);
-      //setTransactions(monthlyTransactions || []);
+      setChartData(dailyExpenses || []);
 
     } catch (error) {
 
+      showToast('error', 'Error', 'Failed to load data. Please try again later.');
       console.error("Failed to load UI data:", error);
-      // Handle errors appropriately
       setBalanceSummaryData({ income: 0, expense: 0, balance: 0 });
       setChartData([]);
       setTransactions([]);
@@ -95,10 +113,12 @@ const HomeScreen: React.FC = () => {
     }
   }, [dbContext]); 
 
-  // useEffect to load data on mount and when selectedMonth or dbContext changes
   useEffect(() => {
     loadUiData(selectedMonth);
-  }, [selectedMonth, loadUiData]); // Dependencies: selectedMonth and the memoized loadUiData function
+  }, [selectedMonth, loadUiData]);
+
+  const currentYear = selectedMonth.getFullYear();
+  const currentMonthNumber = selectedMonth.getMonth() + 1;
 
   return (
     <SafeAreaView style={styles.safeView}>
@@ -114,7 +134,7 @@ const HomeScreen: React.FC = () => {
 
           {/* Balance Card */}
           <BalanceCard
-            monthTotal={balanceSummaryData.balance} // Use state variable
+            monthTotal={balanceSummaryData.balance}
             addIncome={handAddIncomePress}
             addExpense={handAddExpensePress}
           />
@@ -128,20 +148,25 @@ const HomeScreen: React.FC = () => {
           {/* Balance Summary */}
           <BalanceSummary
             containerStyle={common_styles}
-            income={balanceSummaryData.income} // Pass fetched data
-            expense={balanceSummaryData.expense} // Pass fetched data
+            income={balanceSummaryData.income}
+            expense={balanceSummaryData.expense}
+            addIncome={handAddIncomePress}
+            addExpense={handAddExpensePress}
           />
           
           {/* Expenses Breakdown Chart */}
           <ExpensesChart
             containerStyle={common_styles}
-            //data={chartData} // Pass fetched data
+            monthData={chartData} // Pass fetched data
+            year={currentYear}
+            month={currentMonthNumber}
           />
 
           {/* Recent Transactions */}
           <TransactionsList
             containerStyle={common_styles}
-            transactions={transactions} // Pass fetched data
+            transactions={transactions}
+            onDeleteTransaction={handleDeleteTransaction}
           />
         </ScrollView>
       </View>
@@ -153,7 +178,7 @@ const HomeScreen: React.FC = () => {
         onDismiss={hideModal}
         onSave={handleSaveTransaction}
       />
-
+    
     </SafeAreaView>
   );
 };
