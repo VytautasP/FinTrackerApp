@@ -1,34 +1,47 @@
 import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import { Card, Text } from 'react-native-paper';
-import { BarGroup, CartesianChart, PointsArray, useChartTransformState, useLinePath } from "victory-native";
+import { BarGroup, CartesianChart, useChartTransformState } from "victory-native";
 import { appColors } from '../../consts/colors';
-import { DashPathEffect, LinearGradient, Path, useFont, vec } from '@shopify/react-native-skia';
-
-const DATA = Array.from({ length: 31 }, (_, i) => {
-  let lowTmp = 4 + 30 * Math.random();
-  let highTmp = 2 + 10 * Math.random();
-
-  let dtItem = {
-    day: i + 1,
-    income: lowTmp,
-    expense: highTmp,
-    balance: Math.abs(highTmp - lowTmp),
-  }
-
-  return dtItem;
-});
+import { DashPathEffect, useFont} from '@shopify/react-native-skia';
+import { DailyTotal } from '../../services/database/DatabaseService';
 
 interface ExpensesChartProps {
     containerStyle?: ViewStyle;
+    monthData: DailyTotal[];
+    year: number;
+    month: number; // 1-indexed month
 }
 
 const ExpensesChart: React.FC<ExpensesChartProps> = (props: ExpensesChartProps) => {
 
-  const { containerStyle } = props;
+  const { containerStyle, monthData, year, month } = props;
 
   const transformState = useChartTransformState();
   const skFont = useFont(require("../../assets/fonts/Roboto-Regular.ttf"), 12);
+
+  const transformedData = React.useMemo(() => {
+    const daysInMonth = new Date(year, month, 0).getDate();
+    const dailyEntries: { date: number; income: number; expense: number }[] = [];
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      dailyEntries.push({ date: day, income: 0, expense: 0 });
+    }
+
+
+    monthData.forEach(item => {
+      const dayOfMonth = parseInt(item.date.split('-')[2], 10);
+   
+      if (dayOfMonth >= 1 && dayOfMonth <= daysInMonth) {
+        const entry = dailyEntries[dayOfMonth - 1]; // Adjust for 0-indexed array
+        if (entry) {
+          entry.income = item.income;
+          entry.expense = item.expense;
+        }
+      }
+    });
+    return dailyEntries;
+  }, [monthData, year, month]);
 
   return (
     <Card style={[styles.container, containerStyle]}>
@@ -53,9 +66,9 @@ const ExpensesChart: React.FC<ExpensesChartProps> = (props: ExpensesChartProps) 
             padding={{ bottom: -8 }}
             domain={{ x: [0, 31] }}
             viewport={{ x: [0, 7] }}
-            data={DATA}
-            xKey="day"
-            yKeys={["income", "expense", "balance"]}
+            data={transformedData}
+            xKey="date"
+            yKeys={["income", "expense"]}
             xAxis={{
               font: skFont,
               labelColor: appColors.secondaryText,
