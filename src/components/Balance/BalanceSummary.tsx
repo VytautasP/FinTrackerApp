@@ -95,6 +95,7 @@ const styles = StyleSheet.create({
   amount: {
     fontWeight: '700',
     fontSize: 16,
+    color: appColors.black
   },
   label: {
     color: '#757575',

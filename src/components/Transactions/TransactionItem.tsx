@@ -6,6 +6,7 @@ import { Transaction } from '../../services/database/DatabaseService';
 import { BalanceType } from '../../screens/HomeScreen';
 import { getCategoryById } from '../../consts/categories';
 import { formatDate } from 'date-fns';
+import { Swipeable } from 'react-native-gesture-handler';
 
 // Export the interface so it can be used in TransactionsList
 export interface TransactionItemProps {
@@ -17,44 +18,47 @@ const TransactionItem: React.FC<TransactionItemProps> = (props: TransactionItemP
 
   const { transaction, onDeleteTransaction } = props;
   const category = getCategoryById(transaction.category);
-  const [isDeletePressed, setIsDeletePressed] = useState(false);
 
   const onDeleteTransactionHandler = () => {
     onDeleteTransaction(transaction);
   };
 
-  return (
-    <View style={styles.transactionItem}>
-      <View style={styles.leftContainer}>
-        <Avatar.Icon 
-          size={40} 
-          icon={category.icon}
-          style={{ backgroundColor: category.color}}
-          color={appColors.icons} 
+  const renderDeleteAction = () => {
+    return (
+      <View style={{ backgroundColor: appColors.white, width: 80, justifyContent: 'center', alignItems: 'center' }}>
+        <IconButton
+          icon="delete-forever"
+          iconColor={appColors.secondaryText}
+          size={25}
+          onPress={onDeleteTransactionHandler}
         />
-        <View style={styles.transactionDetails}>
-          <Text style={styles.merchantName}>{category.name}</Text>
-          <Text style={styles.transactionDescription}>{transaction.name}</Text>
-          <Text style={styles.transactionDate}>{formatDate(transaction.date, "yyyy-MM-dd")}</Text>
+      </View>
+    );
+  };
+
+  return (
+    <Swipeable renderLeftActions={renderDeleteAction} renderRightActions={renderDeleteAction}>
+      <View style={styles.transactionItem}>
+        <View style={styles.leftContainer}>
+          <Avatar.Icon
+            size={40}
+            icon={category.icon}
+            style={{ backgroundColor: category.color }}
+            color={appColors.icons}
+          />
+          <View style={styles.transactionDetails}>
+            <Text style={styles.merchantName}>{category.name}</Text>
+            <Text style={styles.transactionDescription}>{transaction.name}</Text>
+            <Text style={styles.transactionDate}>{formatDate(transaction.date, "yyyy-MM-dd")}</Text>
+          </View>
+        </View>
+        <View style={styles.rightContainer}>
+          <Text style={[styles.amount, { color: transaction.type === BalanceType.Expense ? 'red' : 'green' }]}>
+            {transaction.type === BalanceType.Expense ? '-€' : '+€'}{transaction.amount.toLocaleString()}
+          </Text>
         </View>
       </View>
-      <View style={styles.rightContainer}>
-        <Text style={[styles.amount, { color: transaction.type === BalanceType.Expense ? 'red' : 'green' }]}>
-           {transaction.type === BalanceType.Expense? '-€' : '+€'}{transaction.amount.toLocaleString()}
-        </Text>
-        <IconButton
-          icon="delete"
-          iconColor={isDeletePressed ? 'red' : appColors.secondaryText}
-          size={20}
-          onPressIn={() => setIsDeletePressed(true)}
-          onPressOut={() => {
-            setIsDeletePressed(false);
-            onDeleteTransactionHandler();
-          }}
-          style={isDeletePressed ? { transform: [{ scale: 1.2 }] } : {}}
-        />
-      </View>
-    </View>
+    </Swipeable>
   );
 };
 
@@ -65,6 +69,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
+    backgroundColor: appColors.white,
   },
   leftContainer: {
     flexDirection: 'row',
@@ -80,6 +85,7 @@ const styles = StyleSheet.create({
   merchantName: {
     fontSize: 14,
     fontWeight: '500',
+    color: appColors.black,
   },
   transactionDescription: {
     fontSize: 13,

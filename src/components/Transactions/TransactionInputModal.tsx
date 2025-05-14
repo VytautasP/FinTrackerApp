@@ -284,7 +284,7 @@ const styles = StyleSheet.create({
   },
   topSection:
   {
-    marginTop: 50,
+    marginTop: 30,
     marginBottom: 22,
     flex: 1,
     width: '100%',
@@ -305,7 +305,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 16,
-    marginTop: 16
+    marginTop: 16,
+    color: appColors.black,
   },
   inputContainer:
   {
@@ -361,6 +362,7 @@ const styles = StyleSheet.create({
   {
     fontSize: 16,
     padding: 4,
+    color: appColors.white
   },
 });
 

@@ -33,7 +33,7 @@ interface DatabaseProviderProps {
 
 const DatabaseLoading = () => {
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: appColors.viewBackground }}>
       <ActivityIndicator animating={true} size={100} color={appColors.widgetGradien2} />
       <Text style={{ marginTop: 10, fontSize: 16 }}>Loading...</Text>
     </View>

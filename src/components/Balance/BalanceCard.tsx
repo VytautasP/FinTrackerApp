@@ -34,11 +34,11 @@ const BalanceCard : React.FC<BalanceCardProps> = (props: BalanceCardProps) => {
         <View style={styles.buttonContainer}>
           <Button mode="text"
             style={styles.smallButton} contentStyle={styles.smallButtonContent} labelStyle={styles.smallButtonLabel} onPress={addIncome}
-          >Add income</Button>
+          ><Text style={{color: appColors.mainWidgetButtonsText, fontWeight: 700 }}>Add income</Text></Button>
           <View style={styles.verticalDivider} />
           <Button
             mode="text" style={styles.smallButton} contentStyle={styles.smallButtonContent} labelStyle={styles.smallButtonLabel} onPress={addExpense}
-          >Add expense</Button>
+          ><Text style={{color: appColors.mainWidgetButtonsText, fontWeight: 700 }}>Add expense</Text></Button>
         </View>
       </Card.Actions>
     </Card>
