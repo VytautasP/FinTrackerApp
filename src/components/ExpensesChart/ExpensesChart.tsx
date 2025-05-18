@@ -20,6 +20,25 @@ const ExpensesChart: React.FC<ExpensesChartProps> = (props: ExpensesChartProps) 
   const transformState = useChartTransformState();
   const skFont = useFont(require("../../assets/fonts/Roboto-Regular.ttf"), 12);
 
+  const today = new Date();
+  const currentDay = today.getDate();
+  const currentMonth = today.getMonth() + 1; // month is 1-indexed
+  const currentYear = today.getFullYear();
+
+  let initialXViewport: [number, number] = [1, 7]; // Default viewport
+
+  if (year === currentYear && month === currentMonth) {
+    const viewportWidth = 7;
+    let viewportStart = Math.max(0, currentDay - 4);
+    let viewportEnd = viewportStart + viewportWidth;
+
+    if (viewportEnd > 31) {
+      viewportEnd = 31;
+      viewportStart = Math.max(0, viewportEnd - viewportWidth);
+    }
+    initialXViewport = [viewportStart, viewportEnd];
+  }
+
   const transformedData = React.useMemo(() => {
     const daysInMonth = new Date(year, month, 0).getDate();
     const dailyEntries: { date: number; income: number; expense: number }[] = [];
@@ -65,7 +84,7 @@ const ExpensesChart: React.FC<ExpensesChartProps> = (props: ExpensesChartProps) 
           <CartesianChart
             padding={{ bottom: -8 }}
             domain={{ x: [0, 31] }}
-            viewport={{ x: [0, 7] }}
+            viewport={{ x: initialXViewport }}
             data={transformedData}
             xKey="date"
             yKeys={["income", "expense"]}
