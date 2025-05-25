@@ -1,4 +1,4 @@
-package com.fintracker
+package wy.zho.com.fintracker
 
 import android.app.Application
 import com.facebook.react.PackageList
