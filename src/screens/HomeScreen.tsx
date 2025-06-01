@@ -12,6 +12,7 @@ import BalanceSummary from '../components/Balance/BalanceSummary';
 import { useDatabase } from '../services/database/DatabaseContext';
 import { DailyTotal, MonthlySummary, Transaction } from '../services/database/DatabaseService';
 import Toast from 'react-native-toast-message';
+import Orientation from 'react-native-orientation-locker';
 
 const container_padding = 16;
 
@@ -116,6 +117,13 @@ const HomeScreen: React.FC = () => {
   useEffect(() => {
     loadUiData(selectedMonth);
   }, [selectedMonth, loadUiData]);
+
+  useEffect(() => {
+    Orientation.lockToPortrait();
+    return () => {
+      Orientation.unlockAllOrientations();
+    }
+  }, []);
 
   const currentYear = selectedMonth.getFullYear();
   const currentMonthNumber = selectedMonth.getMonth() + 1;
