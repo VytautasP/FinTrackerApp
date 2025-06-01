@@ -24,6 +24,7 @@
     "react-native-get-random-values": "^1.11.0",
     "react-native-input-outline": "^1.5.2",
     "react-native-linear-gradient": "^2.8.3",
+    "react-native-orientation-locker": "^1.7.0",
     "react-native-paper": "^5.13.1",
     "react-native-reanimated": "^3.17.1",
     "react-native-reanimated-carousel": "^4.0.2",
