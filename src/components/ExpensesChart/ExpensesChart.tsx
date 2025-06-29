@@ -1,68 +1,96 @@
-import React from 'react';
-import { View, StyleSheet, ViewStyle } from 'react-native';
-import { Card, Text } from 'react-native-paper';
-import { BarGroup, CartesianChart, useChartTransformState } from "victory-native";
-import { appColors } from '../../consts/colors';
-import { DashPathEffect, useFont} from '@shopify/react-native-skia';
+import React from 'react'
+import { StyleSheet, Text, useWindowDimensions, View, ViewStyle } from 'react-native';
 import { DailyTotal } from '../../services/database/DatabaseService';
+import { BarChart } from 'react-native-gifted-charts';
+import { appColors } from '../../consts/colors';
+import { Card } from 'react-native-paper';
 
 interface ExpensesChartProps {
-    containerStyle?: ViewStyle;
-    monthData: DailyTotal[];
-    year: number;
-    month: number; // 1-indexed month
+  containerStyle?: ViewStyle;
+  monthData: DailyTotal[];
+  year: number;
+  month: number; // 1-indexed month
 }
 
 const ExpensesChart: React.FC<ExpensesChartProps> = (props: ExpensesChartProps) => {
 
   const { containerStyle, monthData, year, month } = props;
 
-  const transformState = useChartTransformState();
-  const skFont = useFont(require("../../assets/fonts/Roboto-Regular.ttf"), 12);
-
-  const today = new Date();
-  const currentDay = today.getDate();
-  const currentMonth = today.getMonth() + 1; // month is 1-indexed
-  const currentYear = today.getFullYear();
-
-  let initialXViewport: [number, number] = [1, 7]; // Default viewport
-
-  if (year === currentYear && month === currentMonth) {
-    const viewportWidth = 7;
-    let viewportStart = Math.max(0, currentDay - 4);
-    let viewportEnd = viewportStart + viewportWidth;
-
-    if (viewportEnd > 31) {
-      viewportEnd = 31;
-      viewportStart = Math.max(0, viewportEnd - viewportWidth);
-    }
-    initialXViewport = [viewportStart, viewportEnd];
-  }
-
   const transformedData = React.useMemo(() => {
-    const daysInMonth = new Date(year, month, 0).getDate();
-    const dailyEntries: { date: number; income: number; expense: number }[] = [];
 
+    let daysInMonth = new Date(year, month, 0).getDate();
+    let dailyEntries: { date: number; income: number; expense: number }[] = [];
     for (let day = 1; day <= daysInMonth; day++) {
       dailyEntries.push({ date: day, income: 0, expense: 0 });
     }
 
-
     monthData.forEach(item => {
-      const dayOfMonth = parseInt(item.date.split('-')[2], 10);
-   
+      let dayOfMonth = parseInt(item.date.split('-')[2], 10);
+
       if (dayOfMonth >= 1 && dayOfMonth <= daysInMonth) {
-        const entry = dailyEntries[dayOfMonth - 1]; // Adjust for 0-indexed array
+        let entry = dailyEntries[dayOfMonth - 1]; // Adjust for 0-indexed array
         if (entry) {
           entry.income = item.income;
           entry.expense = item.expense;
         }
       }
     });
-    return dailyEntries;
+
+    let barData = monthData.flatMap(entry => {
+
+      let date = new Date(entry.date).getDate();
+      let dateString = date< 10 ? `0${date}` : date.toString();
+
+      return [{
+        value: entry.income,
+        label: dateString,
+        spacing: 2,
+        labelWidth: 30,
+        labelTextStyle: { color: 'gray' },
+        frontColor: appColors.incomeBar,
+      },
+      { value: entry.expense, frontColor: appColors.expenseBar }]
+    })
+
+
+    return barData;
   }, [monthData, year, month]);
 
+  const axisYTop = React.useMemo(() => {
+
+    let maxIncome = Math.max(...monthData.map(item => item.income));
+    let maxExpense = Math.max(...monthData.map(item => item.expense));
+    let maxValue = Math.max(maxIncome, maxExpense);
+
+    //convert to integer
+    maxValue = Math.ceil(maxValue + (maxValue * 0.20));
+    return maxValue;
+  }, [monthData, year, month]);
+
+  const { width, height } = useWindowDimensions();
+
+  const CustomTooltip = ({ item }: { item: { value: number; frontColor: string } }) => {
+  if (!item) {
+    return null;
+  }
+
+  let marginLeftBase = -14; 
+  let valueIntegerPart = Math.floor(item.value);
+  let valueIntegerDigits = valueIntegerPart.toString().length;
+  let marginLeft = marginLeftBase + -1 * (valueIntegerDigits * 8); // 8 is the width of one digit in the tooltip bubble
+
   return (
+    <View style={styles.tooltipContainer}>
+      <View style={[styles.tooltipBubble, { backgroundColor: item.frontColor }]}>
+        <Text style={styles.tooltipText}>€{item.value.toFixed(2)}</Text>
+      </View>
+      <View style={[styles.tooltipTriangle, { borderTopColor: item.frontColor, marginLeft: marginLeft }]} />
+    </View>
+  );
+};
+
+  return (
+
     <Card style={[styles.container, containerStyle]}>
       {/* Header */}
       <View style={styles.header}>
@@ -80,81 +108,34 @@ const ExpensesChart: React.FC<ExpensesChartProps> = (props: ExpensesChartProps) 
         </View>
       </View>
       <Card.Content>
-        <View style={{ height: 200 }}>
-          <CartesianChart
-            padding={{ bottom: -8 }}
-            domain={{ x: [0, 31] }}
-            viewport={{ x: initialXViewport }}
+        <View style={{ height: 250 }}>
+          <BarChart
             data={transformedData}
-            xKey="date"
-            yKeys={["income", "expense"]}
-            xAxis={{
-              font: skFont,
-              labelColor: appColors.secondaryText,
-              labelOffset: 8,
-              tickCount: 31,
-              formatXLabel: (x) => `${x}d`,
-              enableRescaling: true,
-              //lineColor: 'red',
-              linePathEffect: <DashPathEffect intervals={[4, 4]} />,
+            barWidth={10}
+            spacing={24}
+            roundedTop
+            roundedBottom
+            rulesType = "dashed"
+            rulesThickness = {1}
+            rulesColor = 'gray'
+            rulesLength={ width - 122} // minus padding and legend width
+            xAxisThickness={0}
+            yAxisThickness={0}
+            yAxisTextStyle={{ color: 'gray' }}
+            noOfSections={5}
+            maxValue={axisYTop}
+            renderTooltip={(item: any, index: number) => {
+              if (item.value === 0) {
+                return null;
+              }
+              return <CustomTooltip item={item} />;
             }}
-            yAxis={[{
-              font: skFont,
-              labelColor: appColors.secondaryText,
-              labelOffset: 8,
-              enableRescaling: true,
-              linePathEffect: <DashPathEffect intervals={[2, 2]} />,
-            }]}
-            transformState={transformState.state}
-            transformConfig={{
-              pan: { dimensions: "x" },
-              pinch: { dimensions: "x" }
-            }}
-          >
-
-            {({ points, chartBounds }) => (
-              <>
-                <BarGroup
-                  chartBounds={chartBounds}
-                  barWidth={18}
-                  betweenGroupPadding={0.5}
-                  withinGroupPadding={0.7}
-                  roundedCorners={{
-                    topLeft: 5,
-                    topRight: 5
-                  }}
-                >
-
-                  <BarGroup.Bar points={points.expense} animate={{ type: "spring" }} color={appColors.expenseBar}>
-                    {/* <LinearGradient
-                      start={vec(0, 0)} // 👈 The start and end are vectors that represent the direction of the gradient.
-                      end={vec(0, 250)}
-                      colors={[ // 👈 The colors are an array of strings that represent the colors of the gradient.
-                        "#80ccff",
-                        "#80ccff50" // 👈 The second color is the same as the first but with an alpha value of 50%.
-                      ]}
-                    /> */}
-                  </BarGroup.Bar>
-                  <BarGroup.Bar points={points.income} animate={{ type: "spring" }} color={appColors.incomeBar}>
-                    {/* <LinearGradient
-                      start={vec(0, 0)} // 👈 The start and end are vectors that represent the direction of the gradient.
-                      end={vec(0, 250)}
-                      colors={[ // 👈 The colors are an array of strings that represent the colors of the gradient.
-                        "#a78bfa",
-                        "#a78bfa50" // 👈 The second color is the same as the first but with an alpha value of 50%.
-                      ]}
-                    /> */}
-                  </BarGroup.Bar>
-                </BarGroup>
-                {/* <MyCustomLine points={points.avgTmp} /> */}
-              </>
-            )}
-          </CartesianChart>
+          />
         </View>
       </Card.Content>
     </Card>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -192,6 +173,34 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: appColors.secondaryText,
   },
+
+  tooltipContainer: {
+    alignItems: 'center',
+    marginBottom: 5,
+  },
+  tooltipBubble: {
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+    marginLeft: -20,
+    // The background color is set dynamically inline
+  },
+  tooltipText: {
+    color: appColors.white,
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  tooltipTriangle: {
+    width: 0,
+    height: 0,
+    backgroundColor: 'transparent',
+    borderStyle: 'solid',
+    borderLeftWidth: 6,
+    borderRightWidth: 6,
+    borderTopWidth: 6,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+  }
 });
 
 export default ExpensesChart;
