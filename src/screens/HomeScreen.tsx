@@ -5,7 +5,6 @@ import { Appbar } from 'react-native-paper';
 import { appColors } from '../consts/colors';
 import MonthSelector from '../components/MonthSelector/MonthSelector';
 import BalanceCard from '../components/Balance/BalanceCard';
-import ExpensesChart from '../components/ExpensesChart/ExpensesChart';
 import TransactionsList from '../components/Transactions/TransactionsList';
 import TransactionInputModal, { TransactionItem } from '../components/Transactions/TransactionInputModal';
 import BalanceSummary from '../components/Balance/BalanceSummary';
@@ -13,8 +12,9 @@ import { useDatabase } from '../services/database/DatabaseContext';
 import { DailyTotal, MonthlySummary, Transaction } from '../services/database/DatabaseService';
 import Toast from 'react-native-toast-message';
 import Orientation from 'react-native-orientation-locker';
+import ExpensesChart from '../components/ExpensesChart/ExpensesChart';
 
-const container_padding = 16;
+export const container_padding = 16;
 
 export enum BalanceType {
   Income = 'income',
@@ -166,10 +166,10 @@ const HomeScreen: React.FC = () => {
           <ExpensesChart
             containerStyle={common_styles}
             monthData={chartData} // Pass fetched data
-            year={currentYear}
+            year={currentYear}  
             month={currentMonthNumber}
           />
-
+        
           {/* Recent Transactions */}
           <TransactionsList
             containerStyle={common_styles}
