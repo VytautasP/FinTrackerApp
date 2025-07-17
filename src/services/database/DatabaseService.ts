@@ -30,7 +30,8 @@ export interface DailyTotal {
 
 export interface CategoryTotal {
   category: string;
-  total: number;
+  income: number;
+  expense: number;
 }
 
 const dateFormat = "yyyy-MM-dd";
@@ -417,13 +418,11 @@ export default class DatabaseService {
    * Get transactions grouped by category for a specific month
    * @param {number} year - Year (YYYY)
    * @param {number} month - Month (1-12)
-   * @param {TransactionType} type - Transaction type ('income' or 'expense')
-   * @returns {Promise<CategoryTotal[]>} Category totals
+   * @returns {Promise<CategoryTotal[]>} Category totals with income and expense
    */
   async getCategoryTotalsForMonth(
     year: number, 
-    month: number, 
-    type: TransactionType
+    month: number
   ): Promise<CategoryTotal[]> {
     if (!this.database) {
       throw new Error('Database not initialized');
@@ -445,26 +444,44 @@ export default class DatabaseService {
       }
       const endDate: string = `${nextYear}-${nextMonth}-01`;
       
-      const sqlQuery = `SELECT category, SUM(amount) as total 
+      const incomeQuery = `SELECT category, SUM(amount) as total 
          FROM transactions 
-         WHERE date >= ? AND date < ? AND type = ? 
-         GROUP BY category 
-         ORDER BY total DESC`;
-         
-      const [results] = await this.database.executeSql(sqlQuery,[startDate, endDate, type]);
+         WHERE date >= ? AND date < ? AND type = 'income'
+         GROUP BY category`;
 
-      this.debugDumpSqlResults(sqlQuery, results);
-      
-      const categoryTotals: CategoryTotal[] = [];
-      for (let i = 0; i < results.rows.length; i++) {
-        const row = results.rows.item(i);
-        categoryTotals.push({
-          category: row.category,
-          total: parseFloat(row.total)
-        });
+      const expenseQuery = `SELECT category, SUM(amount) as total 
+         FROM transactions 
+         WHERE date >= ? AND date < ? AND type = 'expense'
+         GROUP BY category`;
+         
+      const [incomeResults] = await this.database.executeSql(incomeQuery, [startDate, endDate]);
+      const [expenseResults] = await this.database.executeSql(expenseQuery, [startDate, endDate]);
+
+      const totals: Record<string, { income: number, expense: number }> = {};
+
+      for (let i = 0; i < incomeResults.rows.length; i++) {
+        const row = incomeResults.rows.item(i);
+        if (!totals[row.category]) {
+          totals[row.category] = { income: 0, expense: 0 };
+        }
+        totals[row.category].income = parseFloat(row.total);
+      }
+
+      for (let i = 0; i < expenseResults.rows.length; i++) {
+        const row = expenseResults.rows.item(i);
+        if (!totals[row.category]) {
+          totals[row.category] = { income: 0, expense: 0 };
+        }
+        totals[row.category].expense = parseFloat(row.total);
       }
       
-      return categoryTotals;
+      const categoryTotals: CategoryTotal[] = Object.keys(totals).map(category => ({
+        category,
+        income: totals[category].income,
+        expense: totals[category].expense
+      }));
+      
+      return categoryTotals.sort((a, b) => (b.income + b.expense) - (a.income + a.expense));
     } catch (error: any) {
       console.error('Error getting category totals:', error);
       throw new Error('Failed to get category totals');

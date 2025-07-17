@@ -21,7 +21,7 @@ interface DatabaseContextValue    {
   summaries: {
     getMonthly: (year: number, month: number) => Promise<MonthlySummary>;
     getDailyTotals: (year: number, month: number) => Promise<DailyTotal[]>;
-    getCategoryTotals: (year: number, month: number, type: 'income' | 'expense') => Promise<CategoryTotal[]>;
+    getCategoryTotals: (year: number, month: number) => Promise<CategoryTotal[]>;
   };
 }
 
@@ -102,8 +102,8 @@ export const DatabaseProvider: React.FC<DatabaseProviderProps> = ({ children }) 
       getDailyTotals: async (year, month) => {
         return await dbService.getDailyTotalsForMonth(year, month);
       },
-      getCategoryTotals: async (year, month, type) => {
-        return await dbService.getCategoryTotalsForMonth(year, month, type);
+      getCategoryTotals: async (year, month) => {
+        return await dbService.getCategoryTotalsForMonth(year, month);
       }
     }
   };
