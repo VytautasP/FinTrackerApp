@@ -7,6 +7,7 @@ import { getCategoryById } from '../../consts/categories';
 import { formatNumber } from '../../helpers/numberUtils';
 import {  Text } from 'react-native-paper';
 import { appColors } from '../../consts/colors';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 interface SummaryPieChartProps {
   monthData: CategoryTotal[];
@@ -88,14 +89,18 @@ const SummaryPieChart: React.FC<SummaryPieChartProps> = ({ monthData }) => {
       onPanResponderRelease: (evt, gestureState) => {
         const canSwitchToIncome = transformIncomeData.length > 0;
         const canSwitchToExpense = transformExpenseData.length > 0;
-        // swipe left to see income
-        if (gestureState.dx < -50 && chartType === ChartType.Expenses && canSwitchToIncome) {
-          setChartType(ChartType.Income);
-        }
-        // swipe right to see expense
-        else if (gestureState.dx > 50 && chartType === ChartType.Income && canSwitchToExpense) {
-          setChartType(ChartType.Expenses);
-        }
+
+        setChartType(currentChartType => {
+          // swipe left to see expense
+          if (gestureState.dx < -50 && currentChartType === ChartType.Expenses && canSwitchToIncome) {
+            return ChartType.Income;
+          }
+          // swipe right to see income
+          if (gestureState.dx > 50 && currentChartType === ChartType.Income && canSwitchToExpense) {
+            return ChartType.Expenses;
+          }
+          return currentChartType;
+        });
       },
     })
   ).current;
@@ -128,15 +133,17 @@ const SummaryPieChart: React.FC<SummaryPieChartProps> = ({ monthData }) => {
   const renderSwitcher = () => {
     const canSwitchToIncome = transformIncomeData.length > 0;
     const canSwitchToExpense = transformExpenseData.length > 0;
+    const isExpensesDisabled = chartType === ChartType.Expenses || !canSwitchToExpense;
+    const isIncomeDisabled = chartType === ChartType.Income || !canSwitchToIncome;
 
     return (
       <View style={styles.switcherContainer}>
         <View style={styles.switcherNav}>
           <TouchableOpacity
             onPress={() => setChartType(ChartType.Expenses)}
-            disabled={chartType === ChartType.Expenses || !canSwitchToExpense}
+            disabled={isExpensesDisabled}
           >
-            <Text style={[styles.arrow, (chartType === ChartType.Expenses || !canSwitchToExpense) && styles.disabledArrow]}>{'<'}</Text>
+            <MaterialCommunityIcons name="arrow-left" size={16} color={isExpensesDisabled ? '#d3d3d3' : appColors.widgetGradien2} />
           </TouchableOpacity>
           <View style={styles.dotsContainer}>
             {canSwitchToExpense && <View style={[styles.dot, chartType === ChartType.Expenses && styles.activeDot]} />}
@@ -144,9 +151,9 @@ const SummaryPieChart: React.FC<SummaryPieChartProps> = ({ monthData }) => {
           </View>
           <TouchableOpacity
             onPress={() => setChartType(ChartType.Income)}
-            disabled={chartType === ChartType.Income || !canSwitchToIncome}
+            disabled={isIncomeDisabled}
           >
-            <Text style={[styles.arrow, (chartType === ChartType.Income || !canSwitchToIncome) && styles.disabledArrow]}>{'>'}</Text>
+            <MaterialCommunityIcons name="arrow-right" size={16} color={isIncomeDisabled ? '#d3d3d3' : appColors.widgetGradien2} />
           </TouchableOpacity>
         </View>
         <Text variant="bodyMedium" style={styles.chartTypeName}>{chartType.charAt(0).toUpperCase() + chartType.slice(1)}</Text>
@@ -226,13 +233,6 @@ const styles = StyleSheet.create({
     height: 12,
     borderRadius: 6,
     marginRight: 10,
-  },
-  arrow: {
-    fontSize: 24,
-    color: appColors.widgetGradien2,
-  },
-  disabledArrow: {
-    color: '#d3d3d3',
   },
   switcherContainer: {
     alignItems: 'center',
