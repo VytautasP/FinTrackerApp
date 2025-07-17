@@ -12,29 +12,34 @@ interface DailyBarChartProps {
 }
 
 const CustomTooltip = ({ item }: { item: { value: number; frontColor: string } }) => {
-    if (!item) {
-      return null;
-    }
-  
-    let marginLeftBase = -14; 
-    let valueIntegerPart = Math.floor(item.value);
-    let valueIntegerDigits = valueIntegerPart.toString().length;
-    let marginLeft = marginLeftBase + -1 * (valueIntegerDigits * 8);
-  
-    return (
-      <View style={styles.tooltipContainer}>
-        <View style={[styles.tooltipBubble, { backgroundColor: item.frontColor }]}>
-          <Text style={styles.tooltipText}>€{item.value.toFixed(2)}</Text>
-        </View>
-        <View style={[styles.tooltipTriangle, { borderTopColor: item.frontColor, marginLeft: marginLeft }]} />
+  if (!item) {
+    return null;
+  }
+
+  let marginLeftBase = -14;
+  let valueIntegerPart = Math.floor(item.value);
+  let valueIntegerDigits = valueIntegerPart.toString().length;
+  let marginLeft = marginLeftBase + -1 * (valueIntegerDigits * 8);
+
+  return (
+    <View style={styles.tooltipContainer}>
+      <View style={[styles.tooltipBubble, { backgroundColor: item.frontColor }]}>
+        <Text style={styles.tooltipText}>€{item.value.toFixed(2)}</Text>
       </View>
-    );
+      <View style={[styles.tooltipTriangle, { borderTopColor: item.frontColor, marginLeft: marginLeft }]} />
+    </View>
+  );
 };
 
 const DailyBarChart: React.FC<DailyBarChartProps> = ({ monthData, year, month }) => {
   const { width } = useWindowDimensions();
 
   const transformedData = React.useMemo(() => {
+
+    if (monthData.length === 0 || monthData.every(item => item.income === 0 && item.expense === 0)) {
+      return [];
+    }
+
     let barData = monthData.flatMap(entry => {
       let date = new Date(entry.date).getDate();
       let dateString = date < 10 ? `0${date}` : date.toString();
@@ -61,95 +66,111 @@ const DailyBarChart: React.FC<DailyBarChartProps> = ({ monthData, year, month })
   }, [monthData]);
 
   return (
-    <>
-      {/* Legend */}
-      <View style={styles.legendContainer}>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendColor, { backgroundColor: appColors.incomeBar }]} />
-          <Text style={styles.legendText}>Income</Text>
+    transformedData.length > 0 ? (
+      <>
+       {/* Legend for Income and Expenses */}
+        <View style={styles.legendContainer}>
+          <View style={styles.legendItem}>
+            <View style={[styles.legendColor, { backgroundColor: appColors.incomeBar }]} />
+            <Text style={styles.legendText}>Income</Text>
+          </View>
+          <View style={styles.legendItem}>
+            <View style={[styles.legendColor, { backgroundColor: appColors.expenseBar }]} />
+            <Text style={styles.legendText}>Expenses</Text>
+          </View>
         </View>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendColor, { backgroundColor: appColors.expenseBar }]} />
-          <Text style={styles.legendText}>Expenses</Text>
-        </View>
-      </View>
+
+        <Card.Content>
+          <View style={{ height: 250 }}>
+
+            <BarChart
+              data={transformedData}
+              barWidth={10}
+              spacing={24}
+              roundedTop
+              roundedBottom
+              rulesType="dashed"
+              rulesThickness={1}
+              rulesColor='gray'
+              rulesLength={width - 122}
+              xAxisThickness={0}
+              yAxisThickness={0}
+              yAxisTextStyle={{ color: 'gray' }}
+              noOfSections={5}
+              maxValue={axisYTop}
+              renderTooltip={(item: any) => {
+                if (item.value === 0) return null;
+                return <CustomTooltip item={item} />;
+              }}
+            />
+
+          </View>
+        </Card.Content>
+      </>
+    ) : (
       <Card.Content>
-        <View style={{ height: 250 }}>
-          <BarChart
-            data={transformedData}
-            barWidth={10}
-            spacing={24}
-            roundedTop
-            roundedBottom
-            rulesType="dashed"
-            rulesThickness={1}
-            rulesColor='gray'
-            rulesLength={width - 122}
-            xAxisThickness={0}
-            yAxisThickness={0}
-            yAxisTextStyle={{ color: 'gray' }}
-            noOfSections={5}
-            maxValue={axisYTop}
-            renderTooltip={(item: any) => {
-              if (item.value === 0) return null;
-              return <CustomTooltip item={item} />;
-            }}
-          />
+        <View style={styles.noDataContainer}>
+          <Text>No data to display</Text>
         </View>
       </Card.Content>
-    </>
+    )
   );
 };
 
 const styles = StyleSheet.create({
-    legendContainer: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        marginTop: 8,
-        paddingHorizontal: 16,
-        paddingBottom: 8,
-    },
-    legendItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginHorizontal: 12,
-    },
-    legendColor: {
-        width: 12,
-        height: 12,
-        borderRadius: 3,
-        marginRight: 6
-    },
-    legendText: {
-        fontSize: 12,
-        color: appColors.secondaryText,
-    },
-    tooltipContainer: {
-        alignItems: 'center',
-        marginBottom: 5,
-    },
-    tooltipBubble: {
-        paddingVertical: 4,
-        paddingHorizontal: 8,
-        borderRadius: 6,
-        marginLeft: -20,
-    },
-    tooltipText: {
-        color: appColors.white,
-        fontWeight: 'bold',
-        fontSize: 14,
-    },
-    tooltipTriangle: {
-        width: 0,
-        height: 0,
-        backgroundColor: 'transparent',
-        borderStyle: 'solid',
-        borderLeftWidth: 6,
-        borderRightWidth: 6,
-        borderTopWidth: 6,
-        borderLeftColor: 'transparent',
-        borderRightColor: 'transparent',
-    }
+  legendContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 8,
+    paddingHorizontal: 16,
+    paddingBottom: 8,
+  },
+  noDataContainer: {
+    height: 250,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 12,
+  },
+  legendColor: {
+    width: 12,
+    height: 12,
+    borderRadius: 3,
+    marginRight: 6
+  },
+  legendText: {
+    fontSize: 12,
+    color: appColors.secondaryText,
+  },
+  tooltipContainer: {
+    alignItems: 'center',
+    marginBottom: 5,
+  },
+  tooltipBubble: {
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+    marginLeft: -20,
+  },
+  tooltipText: {
+    color: appColors.white,
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  tooltipTriangle: {
+    width: 0,
+    height: 0,
+    backgroundColor: 'transparent',
+    borderStyle: 'solid',
+    borderLeftWidth: 6,
+    borderRightWidth: 6,
+    borderTopWidth: 6,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+  }
 });
 
 export default DailyBarChart;
