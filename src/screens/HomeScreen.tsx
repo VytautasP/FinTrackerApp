@@ -9,7 +9,7 @@ import TransactionsList from '../components/Transactions/TransactionsList';
 import TransactionInputModal, { TransactionItem } from '../components/Transactions/TransactionInputModal';
 import BalanceSummary from '../components/Balance/BalanceSummary';
 import { useDatabase } from '../services/database/DatabaseContext';
-import { DailyTotal, MonthlySummary, Transaction } from '../services/database/DatabaseService';
+import { CategoryTotal, DailyTotal, MonthlySummary, Transaction } from '../services/database/DatabaseService';
 import Toast from 'react-native-toast-message';
 import Orientation from 'react-native-orientation-locker';
 import ExpensesChart from '../components/ExpensesChart/ExpensesChart';
@@ -34,7 +34,8 @@ const HomeScreen: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
 
   const [balanceSummaryData, setBalanceSummaryData] = useState<MonthlySummary>({ income: 0, expense: 0, balance: 0 });
-  const [chartData, setChartData] = useState<DailyTotal[]>([]);
+  const [chartDailyData, refreshDailyData] = useState<DailyTotal[]>([]);
+  const [chartCategoryData, setChartCategoryData] = useState<CategoryTotal[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   const showModal = () => {
@@ -98,17 +99,19 @@ const HomeScreen: React.FC = () => {
       const summary = await dbContext.summaries.getMonthly(currentYear, currentMonthNumber);
       const dailyExpenses = await dbContext.summaries.getDailyTotals(currentYear, currentMonthNumber);
       const monthlyTransactions = await dbContext.transactions.getByMonth(currentYear, currentMonthNumber);
+      const monthlyCategoryData = await dbContext.summaries.getCategoryTotals(currentYear, currentMonthNumber);
 
       setTransactions(monthlyTransactions || []);
       setBalanceSummaryData(summary || { income: 0, expense: 0, balance: 0 });
-      setChartData(dailyExpenses || []);
+      refreshDailyData(dailyExpenses || []);
+      setChartCategoryData(monthlyCategoryData || []);
 
     } catch (error) {
 
       showToast('error', 'Error', 'Failed to load data. Please try again later.');
       console.error("Failed to load UI data:", error);
       setBalanceSummaryData({ income: 0, expense: 0, balance: 0 });
-      setChartData([]);
+      refreshDailyData([]);
       setTransactions([]);
 
     }
@@ -165,7 +168,8 @@ const HomeScreen: React.FC = () => {
           {/* Expenses Breakdown Chart */}
           <ExpensesChart
             containerStyle={common_styles}
-            monthData={chartData} // Pass fetched data
+            monthDailyData={chartDailyData}
+            monthCategoryData={chartCategoryData}
             year={currentYear}  
             month={currentMonthNumber}
           />
