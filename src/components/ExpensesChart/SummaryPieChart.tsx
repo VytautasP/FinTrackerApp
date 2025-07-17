@@ -1,10 +1,12 @@
-import React, {  useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, {  useState, useEffect, useRef } from 'react';
+import { StyleSheet, View, TouchableOpacity, PanResponder } from 'react-native';
 import { CategoryTotal } from '../../services/database/DatabaseService';
 import { Card } from 'react-native-paper';
 import { PieChart } from 'react-native-gifted-charts';
 import { getCategoryById } from '../../consts/categories';
 import { formatNumber } from '../../helpers/numberUtils';
+import {  Text } from 'react-native-paper';
+import { appColors } from '../../consts/colors';
 
 interface SummaryPieChartProps {
   monthData: CategoryTotal[];
@@ -16,11 +18,18 @@ interface PieChartDataItem {
   text: string;
 }
 
+enum ChartType {
+  Expenses = 'expenses',
+  Income = 'income',
+}
+
 const SummaryPieChart: React.FC<SummaryPieChartProps> = ({ monthData }) => {
 
   const [focusedItem, setFocusedItem] = useState<PieChartDataItem | null>(null);
+  const [chartType, setChartType] = useState<ChartType>(ChartType.Expenses);
 
   const transformIncomeData = React.useMemo(() => {
+
     const incomeTotals = monthData
       .filter(item => item.income > 0)
       .map(item => {
@@ -64,13 +73,40 @@ const SummaryPieChart: React.FC<SummaryPieChartProps> = ({ monthData }) => {
 
   }, [monthData]);
 
+  useEffect(() => {
+    const data = chartType === ChartType.Expenses ? transformExpenseData : transformIncomeData;
+    const focused = data.find((item: any) => item.focused);
+    setFocusedItem(focused || (data.length > 0 ? data[0] : null));
+  }, [chartType, transformExpenseData, transformIncomeData]);
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (evt, gestureState) => {
+        // Set responder only for horizontal swipes
+        return Math.abs(gestureState.dx) > Math.abs(gestureState.dy) && Math.abs(gestureState.dx) > 10;
+      },
+      onPanResponderRelease: (evt, gestureState) => {
+        const canSwitchToIncome = transformIncomeData.length > 0;
+        const canSwitchToExpense = transformExpenseData.length > 0;
+        // swipe left to see income
+        if (gestureState.dx < -50 && chartType === ChartType.Expenses && canSwitchToIncome) {
+          setChartType(ChartType.Income);
+        }
+        // swipe right to see expense
+        else if (gestureState.dx > 50 && chartType === ChartType.Income && canSwitchToExpense) {
+          setChartType(ChartType.Expenses);
+        }
+      },
+    })
+  ).current;
+
   const renderLegend = (data: PieChartDataItem[]) => {
     return (
       <View style={styles.legendContainer}>
         {data.map((item, index) => (
           <View key={index} style={styles.legendItem}>
             <View style={[styles.legendColorBox, { backgroundColor: item.color }]} />
-            <Text>{item.text}</Text>
+            <Text style={{fontSize : 12, color: 'black'}}>{item.text}</Text>
           </View>
         ))}
       </View>
@@ -89,24 +125,57 @@ const SummaryPieChart: React.FC<SummaryPieChartProps> = ({ monthData }) => {
     );
   }
 
+  const renderSwitcher = () => {
+    const canSwitchToIncome = transformIncomeData.length > 0;
+    const canSwitchToExpense = transformExpenseData.length > 0;
+
+    return (
+      <View style={styles.switcherContainer}>
+        <View style={styles.switcherNav}>
+          <TouchableOpacity
+            onPress={() => setChartType(ChartType.Expenses)}
+            disabled={chartType === ChartType.Expenses || !canSwitchToExpense}
+          >
+            <Text style={[styles.arrow, (chartType === ChartType.Expenses || !canSwitchToExpense) && styles.disabledArrow]}>{'<'}</Text>
+          </TouchableOpacity>
+          <View style={styles.dotsContainer}>
+            {canSwitchToExpense && <View style={[styles.dot, chartType === ChartType.Expenses && styles.activeDot]} />}
+            {canSwitchToIncome && <View style={[styles.dot, chartType === ChartType.Income && styles.activeDot]} />}
+          </View>
+          <TouchableOpacity
+            onPress={() => setChartType(ChartType.Income)}
+            disabled={chartType === ChartType.Income || !canSwitchToIncome}
+          >
+            <Text style={[styles.arrow, (chartType === ChartType.Income || !canSwitchToIncome) && styles.disabledArrow]}>{'>'}</Text>
+          </TouchableOpacity>
+        </View>
+        <Text variant="bodyMedium" style={styles.chartTypeName}>{chartType.charAt(0).toUpperCase() + chartType.slice(1)}</Text>
+      </View>
+    );
+  };
+
+  const chartData = chartType === ChartType.Expenses ? transformExpenseData : transformIncomeData;
+
   return (
     <Card.Content>
-      {transformExpenseData.length > 0 ? (
-        <View style={styles.container}>
-          <View style={styles.chartContainer}>
-            <PieChart
-              donut
-              shadow
-              focusOnPress
-              radius={80}
-              onPress={(item, index) => { setFocusedItem(item); }}
-              innerRadius={60}
-              data={transformExpenseData}
-              centerLabelComponent={renderCenterComponent}
-
-            />
+      {chartData.length > 0 ? (
+        <View>
+          <View style={styles.chartViewContainer} {...panResponder.panHandlers}>
+            <View style={styles.chartContainer}>
+              <PieChart
+                donut
+                shadow
+                focusOnPress
+                radius={80}
+                onPress={(item: any, index: number) => { setFocusedItem(item); }}
+                innerRadius={60}
+                data={chartData}
+                centerLabelComponent={renderCenterComponent}
+              />
+            </View>
+            {renderLegend(chartData)}
           </View>
-          {renderLegend(transformExpenseData)}
+          {renderSwitcher()}
         </View>
       ) : (
         <View style={styles.noDataContainer}>
@@ -123,6 +192,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginVertical: 20,
+    flexDirection: 'row',
+    position: 'relative',
+  },
+  chartViewContainer: {
+    height: 250,
+    justifyContent: 'center',
+    alignItems: 'center',
     flexDirection: 'row',
   },
   noDataContainer: {
@@ -150,6 +226,41 @@ const styles = StyleSheet.create({
     height: 12,
     borderRadius: 6,
     marginRight: 10,
+  },
+  arrow: {
+    fontSize: 24,
+    color: appColors.widgetGradien2,
+  },
+  disabledArrow: {
+    color: '#d3d3d3',
+  },
+  switcherContainer: {
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  switcherNav: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: 100,
+  },
+  dotsContainer: {
+    flexDirection: 'row',
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#d3d3d3',
+    marginHorizontal: 4,
+  },
+  activeDot: {
+    backgroundColor: appColors.widgetGradien2,
+  },
+  chartTypeName: {
+    marginTop: 5,
+    color: '#757575',
+    fontSize: 12,
   },
 });
 
