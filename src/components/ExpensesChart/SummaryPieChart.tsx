@@ -7,6 +7,7 @@ import { getCategoryById } from '../../consts/categories';
 import { formatNumber } from '../../helpers/numberUtils';
 import {  Text } from 'react-native-paper';
 import { appColors } from '../../consts/colors';
+//@ts-ignore
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 interface SummaryPieChartProps {
