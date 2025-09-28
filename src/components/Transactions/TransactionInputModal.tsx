@@ -203,6 +203,8 @@ const TransactionInputModal: React.FC<TransactionInputModalProps> = ({
         onChange={handleSheetChanges}
         onDismiss={handleModalDismiss}
         backdropComponent={InstantBackdrop}
+        keyboardBehavior="interactive"
+        keyboardBlurBehavior="restore"
       >
         <BottomSheetView style={{ height: Dimensions.get('window').height * 0.71 }}>
 
