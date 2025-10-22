@@ -11,6 +11,9 @@ interface DailyBarChartProps {
   month: number;
 }
 
+const BAR_WIDTH = 10;
+const SPACING  = 24;
+
 const CustomTooltip = ({ item }: { item: { value: number; frontColor: string } }) => {
   if (!item) {
     return null;
@@ -33,6 +36,7 @@ const CustomTooltip = ({ item }: { item: { value: number; frontColor: string } }
 
 const DailyBarChart: React.FC<DailyBarChartProps> = ({ monthData, year, month }) => {
   const { width } = useWindowDimensions();
+  const scrollRef = React.useRef<any>(null);
 
   const transformedData = React.useMemo(() => {
 
@@ -65,6 +69,29 @@ const DailyBarChart: React.FC<DailyBarChartProps> = ({ monthData, year, month })
     return maxValue;
   }, [monthData]);
 
+  React.useEffect(() => {
+    if (transformedData.length > 0 && scrollRef.current) {
+
+      const currentDate = new Date();
+      const currentYear = currentDate.getFullYear();
+      const currentMonth = currentDate.getMonth() + 1;
+      
+      if (year === currentYear && month === currentMonth) {
+        const currentDay = 10;
+        const offset = currentDay * (BAR_WIDTH + SPACING);
+
+        setTimeout(() => {
+          if(currentDay >= 26){
+            scrollRef.current?.scrollToEnd({animated: true});
+            return;
+          }
+          scrollRef.current?.scrollTo({x: offset, animated: true});
+        }, 100);
+
+      }
+    }
+  }, [transformedData, year, month]);
+
   return (
     transformedData.length > 0 ? (
       <>
@@ -84,9 +111,10 @@ const DailyBarChart: React.FC<DailyBarChartProps> = ({ monthData, year, month })
           <View style={{ height: 250 }}>
 
             <BarChart
+              scrollRef={scrollRef}
               data={transformedData}
-              barWidth={10}
-              spacing={24}
+              barWidth={BAR_WIDTH}
+              spacing={SPACING}
               roundedTop
               roundedBottom
               rulesType="dashed"
